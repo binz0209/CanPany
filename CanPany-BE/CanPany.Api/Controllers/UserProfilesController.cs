@@ -1,0 +1,83 @@
+using CanPany.Application.Interfaces.Services;
+using CanPany.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+
+namespace CanPany.Api.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class UserProfilesController : ControllerBase
+{
+    private readonly IUserProfileService _svc;
+    private readonly IUserSettingsService _settings;
+    public UserProfilesController(IUserProfileService svc, IUserSettingsService settings)
+    {
+        _svc = svc;
+        _settings = settings;
+    }
+
+    [Authorize]
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(string id) => Ok(await _svc.GetByIdAsync(id));
+
+    [Authorize] 
+    [HttpGet("by-user/{userId}")]
+    public async Task<IActionResult> GetByUser(string userId)   
+    {
+        var profile = await _svc.GetByUserIdAsync(userId);
+        if (profile == null) return NotFound();
+
+        // Enforce privacy with default public=true
+        var settings = await _settings.GetByUserIdAsync(userId);
+        var isPublic = settings?.PrivacySettings?.PublicProfile ?? true;
+
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isOwner = !string.IsNullOrEmpty(currentUserId) && currentUserId == userId;
+        var isAdmin = User.IsInRole("Admin");
+
+        if (!isPublic && !(isOwner || isAdmin))
+        {
+            return Ok(new { hidden = true, message = "Người dùng đã ẩn hồ sơ công khai" });
+        }
+
+        return Ok(profile);
+    }
+        
+
+    [Authorize]
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] UserProfile dto) => Ok(await _svc.CreateAsync(dto));
+
+    [Authorize]
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(string id, [FromBody] UserProfile dto)
+    {
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(currentUserId)) return Unauthorized();
+
+        var profile = await _svc.GetByIdAsync(id);
+        if (profile == null) return NotFound();
+
+        if (profile.UserId != currentUserId && !User.IsInRole("Admin"))
+            return Forbid();
+
+        var updated = await _svc.UpdateAsync(id, dto);
+        return Ok(updated);
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(string id) => Ok(await _svc.DeleteAsync(id));
+    [Authorize]
+
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAll()
+    {
+        var profiles = await _svc.GetAllAsync();
+        return Ok(profiles);
+    }
+
+
+}
