@@ -16,7 +16,7 @@ export default function TopUpModal({ open, onClose, userId, onSuccess }) {
 
     try {
       setLoading(true);
-      const res = await api.post("/api/payments/topup", {
+      const res = await api.post("/payments/topup", {
         userId,
         amount: amt,
         orderInfo: note || `Topup ${amt} VND`,

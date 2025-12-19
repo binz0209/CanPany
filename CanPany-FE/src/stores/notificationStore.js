@@ -42,7 +42,7 @@ export const useNotificationStore = create((set, get) => ({
   // 🧠 Load lại thông báo cũ từ DB
   fetchFromServer: async () => {
     try {
-      const res = await api.get("/api/notifications/my"); // ✅ chuẩn với BE
+      const res = await api.get("/notifications/my"); // ✅ chuẩn với BE
       const data = res.data || [];
 
       const parsed = data.map((n) => {

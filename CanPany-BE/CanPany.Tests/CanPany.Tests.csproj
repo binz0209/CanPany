@@ -19,10 +19,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\LanServe.Api\CanPany.Api.csproj" />
-		<ProjectReference Include="..\LanServe.Application\CanPany.Application.csproj" />
-		<ProjectReference Include="..\LanServe.Domain\CanPany.Domain.csproj" />
-		<ProjectReference Include="..\LanServe.Infrastructure\CanPany.Infrastructure.csproj" />
+		<ProjectReference Include="..\CanPany.Api\CanPany.Api.csproj" />
+		<ProjectReference Include="..\CanPany.Application\CanPany.Application.csproj" />
+		<ProjectReference Include="..\CanPany.Domain\CanPany.Domain.csproj" />
+		<ProjectReference Include="..\CanPany.Infrastructure\CanPany.Infrastructure.csproj" />
 	</ItemGroup>
 
 </Project>

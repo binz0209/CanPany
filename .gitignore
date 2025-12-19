@@ -81,8 +81,8 @@ Serilog*.log
 **/appsettings.Local.json
 **/appsettings.*.Local.json
 **/appsettings.*.user.json
-# Không commit appsettings.json và appsettings.Development.json
-
+# Không commit appsettings.json và appsettings.Development.json (chứa secrets)
+**/appsettings.json
 **/appsettings.Development.json
 # Nếu dùng biến môi trường:
 .env

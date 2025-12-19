@@ -21,7 +21,7 @@ export default function Register() {
     if (form.password !== form.confirm)
       return setErr("Mật khẩu xác nhận không khớp.");
     try {
-      const res = await api.post("/api/auth/register", {
+      const res = await api.post("/auth/register", {
         fullName: form.name,
         email: form.email,
         password: form.password,
@@ -73,7 +73,7 @@ export default function Register() {
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       const idToken = credentialResponse.credential;
-      const res = await api.post("/api/auth/google", { idToken });
+      const res = await api.post("/auth/google", { idToken });
       
       const token = res.data?.accessToken;
       if (!token) throw new Error("Google login failed: No token");

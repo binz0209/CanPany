@@ -30,7 +30,7 @@ const Statistics = () => {
   const fetchStatistics = async () => {
     try {
       // Get payments for revenue calculation
-      const paymentsRes = await api.get('/api/payments');
+      const paymentsRes = await api.get('/payments');
       const payments = paymentsRes.data || [];
       
       // Mock revenue data
@@ -44,7 +44,7 @@ const Statistics = () => {
       ]);
 
       // Get categories
-      const categoriesRes = await api.get('/api/categories');
+      const categoriesRes = await api.get('/categories');
       const categories = categoriesRes.data || [];
       
       // Mock category distribution

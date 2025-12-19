@@ -35,7 +35,7 @@ export default function Login() {
     setLoading(true);
     try {
       // ✅ Gửi rememberMe lên server
-      const res = await api.post("/api/auth/login", {
+      const res = await api.post("/auth/login", {
         email: form.email,
         password: form.password,
         rememberMe: form.rememberMe,
@@ -124,7 +124,7 @@ export default function Login() {
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       const idToken = credentialResponse.credential;
-      const res = await api.post("/api/auth/google", { idToken });
+      const res = await api.post("/auth/google", { idToken });
 
       const token = res.data?.accessToken;
       if (!token) throw new Error("Google login failed: No token");
@@ -181,7 +181,7 @@ export default function Login() {
   const handleSendCode = async () => {
     if (!email) return toast.error("Vui lòng nhập email.");
     try {
-      await api.post("api/auth/forgot-password", { email });
+      await api.post("/auth/forgot-password", { email });
       toast.success("Đã gửi mã xác nhận đến email của bạn!");
       setStep(2);
     } catch (err) {
@@ -193,7 +193,7 @@ export default function Login() {
     if (!code || !newPassword)
       return toast.error("Vui lòng nhập đầy đủ thông tin.");
     try {
-      await api.post("/api/auth/reset-password", { email, code, newPassword });
+      await api.post("/auth/reset-password", { email, code, newPassword });
       toast.success("Đặt lại mật khẩu thành công!");
       setShowForgot(false);
       setStep(1);

@@ -36,7 +36,7 @@ const Projects = () => {
   const fetchProjects = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/projects');
+      const response = await api.get('/projects');
       setProjects(response.data || []);
     } catch (error) {
       console.error('Error fetching projects:', error);
@@ -48,7 +48,7 @@ const Projects = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await api.get('/api/categories');
+      const response = await api.get('/categories');
       setCategories(response.data || []);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -166,7 +166,7 @@ const Projects = () => {
     try {
       if (editingProject) {
         // Update
-        await api.put(`/api/projects/${editingProject.id}`, {
+        await api.put(`/projects/${editingProject.id}`, {
           title: formData.title,
           description: formData.description,
           budgetAmount: Number(formData.budgetAmount),
@@ -182,7 +182,7 @@ const Projects = () => {
           return;
         }
         // For admin create, we might need ownerId - using a default or current admin
-        await api.post('/api/projects', {
+        await api.post('/projects', {
           title: formData.title,
           description: formData.description,
           budgetAmount: Number(formData.budgetAmount),
@@ -204,7 +204,7 @@ const Projects = () => {
     if (!confirm('Bạn có chắc muốn xóa dự án này?')) return;
     
     try {
-      await api.delete(`/api/projects/${projectId}`);
+      await api.delete(`/projects/${projectId}`);
       toast.success('Xóa dự án thành công');
       fetchProjects();
     } catch (error) {

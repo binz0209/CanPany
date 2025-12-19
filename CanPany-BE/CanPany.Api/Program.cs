@@ -91,9 +91,10 @@ services.AddCors(opt =>
         // Nếu dùng IPv6 trên Windows:
         // "http://[::1]:5173", "https://[::1]:5173"
         )
-        .AllowAnyHeader()
         .AllowAnyMethod()
-        .AllowCredentials() // dùng Authorization header vẫn OK
+        .AllowAnyHeader()
+        .AllowCredentials()
+        .SetPreflightMaxAge(TimeSpan.FromSeconds(86400)) // Cache preflight 24h
     );
 });
 
@@ -252,6 +253,9 @@ app.Map("/__error", (HttpContext http, ILoggerFactory lf) =>
 
 
 // ========== Middlewares ==========
+// CORS PHẢI được đặt ở đầu pipeline để xử lý preflight OPTIONS requests
+app.UseCors(CorsPolicy);
+
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -270,8 +274,8 @@ app.Lifetime.ApplicationStarted.Register(() =>
     Console.WriteLine("=====================================");
 });
 
-app.UseHttpsRedirection();
-app.UseCors(CorsPolicy);
+// Tắt HTTPS redirection trong development để tránh ảnh hưởng đến CORS preflight
+// app.UseHttpsRedirection();
 
 // ========== Audit Logging Middleware ==========
 app.UseMiddleware<CanPany.Api.Middlewares.AuditLoggingMiddleware>();

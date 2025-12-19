@@ -1,22 +1,33 @@
 using CanPany.Application.Interfaces.Repositories;
 using CanPany.Application.Interfaces.Services;
 using CanPany.Domain.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace CanPany.Application.Services;
 
 public class AuditService : IAuditService
 {
     private readonly IAuditLogRepository _repo;
+    private readonly ILogger<AuditService>? _logger;
 
-    public AuditService(IAuditLogRepository repo)
+    public AuditService(IAuditLogRepository repo, ILogger<AuditService>? logger = null)
     {
         _repo = repo;
+        _logger = logger;
     }
 
     public async Task LogAsync(AuditLog auditLog)
     {
-        auditLog.CreatedAt = DateTime.UtcNow;
-        await _repo.InsertAsync(auditLog);
+        try
+        {
+            auditLog.CreatedAt = DateTime.UtcNow;
+            await _repo.InsertAsync(auditLog);
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't throw - audit logging should not break the application
+            _logger?.LogWarning(ex, "Failed to log audit entry. Application continues normally.");
+        }
     }
 
     public async Task LogRequestAsync(

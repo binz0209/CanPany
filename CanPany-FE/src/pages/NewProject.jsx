@@ -62,8 +62,8 @@ export default function NewProject() {
     (async () => {
       try {
         const [catRes, skillRes] = await Promise.all([
-          api.get("/api/categories"),
-          api.get("/api/skills"),
+          api.get("/categories"),
+          api.get("/skills"),
         ]);
         setCategories(catRes.data ?? []);
         setSkillOptions(skillRes.data ?? []);
@@ -95,7 +95,7 @@ export default function NewProject() {
     if (!userId) return 0;
     try {
       // BE: GET /api/wallets/{userId} -> { balance }
-      const res = await api.get(`/api/wallets/${userId}`);
+      const res = await api.get(`/wallets/${userId}`);
       return Number(res.data?.balance || 0);
     } catch {
       return 0;
@@ -145,7 +145,7 @@ export default function NewProject() {
       }
 
       // ② TẠO PROJECT (không rút tiền ở bước này)
-      await api.post("/api/projects", payload);
+      await api.post("/projects", payload);
 
       alert("Đăng dự án thành công!");
       navigate("/projects");

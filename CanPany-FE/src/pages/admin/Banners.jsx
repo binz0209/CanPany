@@ -24,7 +24,7 @@ export default function Banners() {
   const loadBanners = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/api/banners');
+      const res = await api.get('/banners');
       setBanners(res.data || []);
     } catch (err) {
       console.error('Load banners failed', err);
@@ -50,7 +50,7 @@ export default function Banners() {
           order: formData.order || 0,
           isActive: formData.isActive
         };
-        await api.put(`/api/banners/${editing.id || editing._id}`, updateData);
+        await api.put(`/banners/${editing.id || editing._id}`, updateData);
       } else {
         // Khi tạo mới, không gửi Id
         const createData = {
@@ -60,7 +60,7 @@ export default function Banners() {
           order: formData.order || 0,
           isActive: formData.isActive
         };
-        await api.post('/api/banners', createData);
+        await api.post('/banners', createData);
       }
       alert(editing ? 'Cập nhật banner thành công!' : 'Tạo banner thành công!');
       setShowForm(false);
@@ -86,7 +86,7 @@ export default function Banners() {
   const handleDelete = async (id) => {
     if (!confirm('Bạn có chắc muốn xóa banner này?')) return;
     try {
-      await api.delete(`/api/banners/${id}`);
+      await api.delete(`/banners/${id}`);
       alert('Xóa banner thành công!');
       loadBanners();
     } catch (err) {

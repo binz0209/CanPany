@@ -37,7 +37,7 @@ export default function PaymentSuccess() {
       try {
         // 1) gọi BE xác nhận topup theo orderId (vnp_TxnRef)
         if (userId && orderId) {
-          await api.get("/api/wallets/topup-result", {
+          await api.get("/wallets/topup-result", {
             params: { orderId, userId },
           });
         }

@@ -46,7 +46,7 @@ export default function NotificationBell() {
     // Đánh dấu đã đọc
     if (!n.isRead && n.id) {
       try {
-        await api.post(`/api/notifications/${n.id}/read`);
+        await api.post(`/notifications/${n.id}/read`);
         markRead(n.id);
       } catch (err) {
         console.error("Failed to mark notification as read:", err);

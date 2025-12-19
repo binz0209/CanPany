@@ -6,7 +6,7 @@ export default function BannerCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    api.get('/api/banners/active')
+    api.get('/banners/active')
       .then(res => {
         const activeBanners = res.data || [];
         setBanners(activeBanners);

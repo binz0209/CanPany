@@ -55,7 +55,7 @@ const Dashboard = () => {
       const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
 
       // Get all users
-      const usersRes = await api.get('/api/users').catch(err => {
+      const usersRes = await api.get('/users').catch(err => {
         console.error('Failed to fetch users:', err);
         return { data: [] };
       });
@@ -74,7 +74,7 @@ const Dashboard = () => {
       const userChange = calculateChange(usersThisMonth, usersLastMonth);
 
       // Get all projects
-      const projectsRes = await api.get('/api/projects').catch(err => {
+      const projectsRes = await api.get('/projects').catch(err => {
         console.error('Failed to fetch projects:', err);
         return { data: [] };
       });
@@ -93,7 +93,7 @@ const Dashboard = () => {
       const projectChange = calculateChange(projectsThisMonth, projectsLastMonth);
 
       // Get all contracts
-      const contractsRes = await api.get('/api/contracts').catch(err => {
+      const contractsRes = await api.get('/contracts').catch(err => {
         console.error('Failed to fetch contracts:', err);
         return { data: [] };
       });

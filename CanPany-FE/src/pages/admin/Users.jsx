@@ -33,7 +33,7 @@ const Users = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/users');
+      const response = await api.get('/users');
       setUsers(response.data || []);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -153,11 +153,11 @@ const Users = () => {
           // Note: Backend might need a separate endpoint for password change
           payload.password = formData.password;
         }
-        await api.put(`/api/users/${editingUser.id}`, payload);
+        await api.put(`/users/${editingUser.id}`, payload);
         toast.success('Cập nhật người dùng thành công');
       } else {
         // Create
-        await api.post('/api/users', {
+        await api.post('/users', {
           email: formData.email,
           fullName: formData.fullName,
           role: formData.role,
@@ -177,7 +177,7 @@ const Users = () => {
     if (!confirm('Bạn có chắc muốn xóa người dùng này?')) return;
     
     try {
-      await api.delete(`/api/users/${userId}`);
+      await api.delete(`/users/${userId}`);
       toast.success('Xóa người dùng thành công');
       fetchUsers();
     } catch (error) {

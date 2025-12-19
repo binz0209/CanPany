@@ -37,11 +37,11 @@ export default function UserSearch() {
   const fetchAllData = async () => {
     try {
       setLoading(true);
-      const userRes = await api.get("/api/users");
+      const userRes = await api.get("/users");
       setUsers(userRes.data);
-      const profRes = await api.get("/api/userprofiles/all").catch(() => null);
+      const profRes = await api.get("/userprofiles/all").catch(() => null);
       if (profRes?.data) setProfiles(profRes.data);
-      const skillRes = await api.get("/api/skills");
+      const skillRes = await api.get("/skills");
       setSkills(skillRes.data);
     } catch (err) {
       console.error("Fetch data error:", err);

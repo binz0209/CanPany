@@ -64,7 +64,7 @@ async function handleProposalEdit(proposalId, price) {
 async function fetchProposalStatus(proposalId) {
   if (!proposalId) return null;
   try {
-    const res = await api.get(`api/Proposals/${proposalId}`); // ✅ viết hoa Proposals
+    const res = await api.get(`/Proposals/${proposalId}`); // ✅ viết hoa Proposals
     const status = (res.data?.status || "").trim().toLowerCase();
     console.log("[Proposal] status:", status);
     return status;
@@ -169,7 +169,7 @@ export default function Messages() {
 
   async function getMyWalletBalance(userId) {
     // BE Dev/Test: [HttpGet("{userId}")] => /api/wallets/{userId}
-    const res = await api.get(`api/wallets/${userId}`);
+    const res = await api.get(`/wallets/${userId}`);
     // kỳ vọng { balance: number }
     const bal = res?.data?.balance ?? res?.data?.Balance ?? 0;
     return Number(bal) || 0;
@@ -244,11 +244,11 @@ export default function Messages() {
     if (!currentUserId) return;
     const load = async () => {
       try {
-        const { data: convs } = await api.get("api/messages/my-conversations");
+        const { data: convs } = await api.get("/messages/my-conversations");
         const list = Array.isArray(convs) ? convs : [];
         setConversations(list);
 
-        const { data: allUsers } = await api.get("api/users");
+        const { data: allUsers } = await api.get("/users");
         const newMap = new Map(
           (allUsers || []).map((u) => [u.id || u._id || u.userId, u])
         );
@@ -285,7 +285,7 @@ export default function Messages() {
       for (const pid of ids) {
         if (newMap.has(pid)) continue;
         try {
-          const res = await api.get(`api/projects/${pid}`);
+          const res = await api.get(`/projects/${pid}`);
           const proj = res.data || {};
           const title =
             proj.title || proj.name || proj.projectName || "(Không tên)";
@@ -308,7 +308,7 @@ export default function Messages() {
   const loadThread = useCallback(async (key, resetPagination = true) => {
     if (!key) return;
     try {
-      const res = await api.get(`api/messages/thread/${key}`);
+      const res = await api.get(`/messages/thread/${key}`);
       const normalized = (res.data || []).map(normalizeMessage);
 
       // thêm xử lý fetch status + allow contract-id
@@ -577,7 +577,7 @@ export default function Messages() {
           
           // Load thông tin user nếu chưa có
           if (!usersMap.has(partnerId)) {
-            api.get(`api/users/${partnerId}`).then((res) => {
+            api.get(`/users/${partnerId}`).then((res) => {
               const user = res.data;
               if (user) {
                 setUsersMap((prev) => new Map(prev).set(partnerId, user));
@@ -587,7 +587,7 @@ export default function Messages() {
           
           // Load thông tin project nếu chưa có
           if (projectId && projectId !== "null" && !projectsMap.has(projectId)) {
-            api.get(`api/projects/${projectId}`).then((res) => {
+            api.get(`/projects/${projectId}`).then((res) => {
               const proj = res.data || {};
               const title = proj.title || proj.name || proj.projectName || "(Không tên)";
               const owner = proj.ownerName || proj.createdByName || proj.owner?.fullName || "(Chưa rõ)";
@@ -652,7 +652,7 @@ export default function Messages() {
       try {
         // URL encode conversationKey vì nó có dấu `:`
         const encodedKey = encodeURIComponent(activeConversationKey);
-        await api.post(`api/messages/conversation/${encodedKey}/read-all`);
+        await api.post(`/messages/conversation/${encodedKey}/read-all`);
         // Cập nhật isRead cho tất cả messages trong state
         setAllMessages((prev) =>
           prev.map((m) => {
@@ -734,7 +734,7 @@ export default function Messages() {
         if (!confirm("Bạn có chắc muốn hủy đề xuất này không?")) return;
         try {
           btn.disabled = true;
-          await api.post(`api/Proposals/${proposalId}/cancel`, { projectId }); // ✅ viết hoa + gửi projectId
+          await api.post(`/Proposals/${proposalId}/cancel`, { projectId }); // ✅ viết hoa + gửi projectId
           await loadThread(activeConversationKey);
         } catch (err) {
           console.error("Cancel proposal error:", err.message);
@@ -780,7 +780,7 @@ export default function Messages() {
           // 4️⃣ Đủ tiền → trừ ví trước
           const note = `Withdraw for accepted proposal #${proposalId}`;
           try {
-            await api.post("/api/wallets/change-balance", {
+            await api.post("/wallets/change-balance", {
               Delta: -Math.abs(amount),
               Note: note,
             });
@@ -792,7 +792,7 @@ export default function Messages() {
           }
 
           // 5️⃣ Sau khi trừ tiền thành công → Gọi accept
-          await api.post(`api/Proposals/${proposalId}/accept`, { projectId });
+          await api.post(`/Proposals/${proposalId}/accept`, { projectId });
           await loadThread(activeConversationKey); // reload thread để thấy message mới
           alert("Đồng ý đề xuất thành công!");
         } catch (err) {
@@ -816,7 +816,7 @@ export default function Messages() {
         if (!contractId) return;
         try {
           btn.disabled = true;
-          const res = await api.get(`api/Contracts/${contractId}`); // ✅ viết hoa Contracts
+          const res = await api.get(`/Contracts/${contractId}`); // ✅ viết hoa Contracts
           setContractData(res.data || {});
           setShowContractModal(true);
         } catch (err) {
@@ -847,7 +847,7 @@ export default function Messages() {
         projectId: projectId && projectId !== "null" ? projectId : null,
       };
       console.log("📤 [Messages.jsx] Sending message:", payload);
-      const res = await api.post("api/messages", payload);
+      const res = await api.post("/messages", payload);
       console.log("✅ [Messages.jsx] Message sent successfully:", res.data);
       
       // Clear text ngay để UI responsive
@@ -915,7 +915,7 @@ export default function Messages() {
       note: `Payout for contract #${contractId}`,
     };
     // BE phải có endpoint này (ở dưới)
-    const res = await api.post("/api/wallets/payout", payload);
+    const res = await api.post("/wallets/payout", payload);
     return res.data;
   }
 
@@ -1069,7 +1069,7 @@ export default function Messages() {
                 try {
                   // URL encode conversationKey vì nó có dấu `:`
                   const encodedKey = encodeURIComponent(it.conversationKey);
-                  await api.post(`api/messages/conversation/${encodedKey}/read-all`);
+                  await api.post(`/messages/conversation/${encodedKey}/read-all`);
                   // Reset unreadCount khi mở conversation
                   setConversations((prev) => {
                     const updated = [...prev];
@@ -1319,7 +1319,7 @@ export default function Messages() {
                 className="btn btn-danger"
                 onClick={async () => {
                   try {
-                    await api.post(`api/Proposals/${cancelProposalId}/cancel`, {
+                    await api.post(`/Proposals/${cancelProposalId}/cancel`, {
                       projectId: null,
                     });
                     setConfirmingCancel(false);
@@ -1415,12 +1415,12 @@ export default function Messages() {
 
                         // 2) 📝 Cập nhật trạng thái hợp đồng thành Completed
                         try {
-                          await api.put(`api/Contracts/${contractId}`, {
+                          await api.put(`/Contracts/${contractId}`, {
                             ...contractData,
                             status: "Completed",
                           });
                         } catch {
-                          await api.put(`api/Contracts/${contractId}`, {
+                          await api.put(`/Contracts/${contractId}`, {
                             status: "Completed",
                           });
                         }

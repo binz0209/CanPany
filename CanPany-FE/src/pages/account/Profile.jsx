@@ -59,7 +59,7 @@ export default function Profile() {
         setIsOwner(!viewedUserId && res.data.userId === currentUserId);
 
         if (res.data.skillIds?.length > 0) {
-          const sres = await api.post("/api/skills/resolve", res.data.skillIds);
+          const sres = await api.post("/skills/resolve", res.data.skillIds);
           setSkills(sres.data);
         }
       })
@@ -112,10 +112,10 @@ export default function Profile() {
 
   const handleSave = async () => {
     try {
-      await api.put(`/api/userprofiles/${profile.id}`, profile);
+      await api.put(`/userprofiles/${profile.id}`, profile);
       // Cập nhật avatar nếu có
       if (avatarUrl && user) {
-        await api.put(`/api/users/${user.id}`, { ...user, avatarUrl });
+        await api.put(`/users/${user.id}`, { ...user, avatarUrl });
       }
       alert("Cập nhật thành công!");
       setIsEditingProfile(false);
@@ -136,9 +136,9 @@ export default function Profile() {
         skillIds: [...(profile.skillIds || []), selectedSkill],
       };
 
-      await api.put(`/api/userprofiles/${profile.id}`, updated);
+      await api.put(`/userprofiles/${profile.id}`, updated);
 
-      const sres = await api.post("/api/skills/resolve", updated.skillIds);
+      const sres = await api.post("/skills/resolve", updated.skillIds);
       setSkills(sres.data);
       setProfile(updated);
       setSelectedSkill("");
@@ -155,9 +155,9 @@ export default function Profile() {
         skillIds: profile.skillIds.filter((id) => id !== skillId),
       };
 
-      await api.put(`/api/userprofiles/${profile.id}`, updated);
+      await api.put(`/userprofiles/${profile.id}`, updated);
 
-      const sres = await api.post("/api/skills/resolve", updated.skillIds);
+      const sres = await api.post("/skills/resolve", updated.skillIds);
       setSkills(sres.data);
       setProfile(updated);
     } catch (err) {

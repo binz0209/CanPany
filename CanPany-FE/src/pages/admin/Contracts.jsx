@@ -29,7 +29,7 @@ const Contracts = () => {
   const fetchContracts = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/contracts');
+      const response = await api.get('/contracts');
       setContracts(response.data || []);
     } catch (error) {
       console.error('Error fetching contracts:', error);
@@ -114,7 +114,7 @@ const Contracts = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.put(`/api/contracts/${editingContract.id}`, {
+      await api.put(`/contracts/${editingContract.id}`, {
         ...editingContract,
         status: formData.status
       });
@@ -131,7 +131,7 @@ const Contracts = () => {
     if (!confirm('Bạn có chắc muốn xóa hợp đồng này?')) return;
     
     try {
-      await api.delete(`/api/contracts/${contractId}`);
+      await api.delete(`/contracts/${contractId}`);
       toast.success('Xóa hợp đồng thành công');
       fetchContracts();
     } catch (error) {

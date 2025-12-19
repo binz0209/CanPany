@@ -13,12 +13,12 @@ export default function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.get("/api/categories")
+    api.get("/categories")
       .then(res => setCategories(res.data ?? []))
       .catch(err => console.error("Load categories failed", err));
 
     // dùng /users vì BE chưa có /userprofiles
-    api.get("/api/users")
+    api.get("/users")
       .then(res => setFreelancers(res.data ?? []))
       .catch(err => console.error("Load freelancers failed", err));
 
@@ -27,7 +27,7 @@ export default function Home() {
     if (token) {
       try {
         setIsLoggedIn(true);
-        api.get("/api/projects/recommended?limit=6")
+        api.get("/projects/recommended?limit=6")
           .then(res => {
             const data = res.data || [];
             setRecommendedProjects(data.map(item => ({

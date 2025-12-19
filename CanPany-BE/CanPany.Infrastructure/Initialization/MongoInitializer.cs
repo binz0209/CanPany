@@ -22,8 +22,28 @@ public class MongoInitializer : IMongoInitializer
 
     public async Task InitializeAsync(CancellationToken ct = default)
     {
-        await _ctx.Database.RunCommandAsync((Command<BsonDocument>)"{ ping: 1 }", cancellationToken: ct);
-        _logger.LogInformation("Mongo ping OK on {Db}", _opt.DbName);
+        try
+        {
+            await _ctx.Database.RunCommandAsync((Command<BsonDocument>)"{ ping: 1 }", cancellationToken: ct);
+            _logger.LogInformation("Mongo ping OK on {Db}", _opt.DbName);
+        }
+        catch (MongoDB.Driver.MongoAuthenticationException ex)
+        {
+            _logger.LogError(ex, "MongoDB Authentication Failed. Please check:");
+            _logger.LogError("1. Username and password in connection string");
+            _logger.LogError("2. IP address is whitelisted in MongoDB Atlas Network Access");
+            _logger.LogError("3. Database user has correct permissions");
+            _logger.LogError("Connection String (masked): {ConnectionString}", 
+                _opt.ConnectionString != null && _opt.ConnectionString.Length > 50 
+                    ? _opt.ConnectionString.Substring(0, 50) + "..." 
+                    : _opt.ConnectionString ?? "null");
+            throw; // Re-throw to stop app startup
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to connect to MongoDB");
+            throw;
+        }
 
         var existing = await _ctx.Database.ListCollectionNames().ToListAsync(ct);
         async Task EnsureCollection(string name)

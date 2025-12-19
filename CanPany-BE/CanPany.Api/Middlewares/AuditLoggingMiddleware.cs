@@ -18,6 +18,13 @@ public class AuditLoggingMiddleware
 
     public async Task InvokeAsync(HttpContext context, IAuditService auditService)
     {
+        // Bỏ qua OPTIONS requests (CORS preflight) - không cần audit
+        if (context.Request.Method == "OPTIONS")
+        {
+            await _next(context);
+            return;
+        }
+
         var stopwatch = Stopwatch.StartNew();
         var startTime = DateTime.UtcNow;
 

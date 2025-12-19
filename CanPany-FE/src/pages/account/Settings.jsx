@@ -16,7 +16,7 @@ export default function Settings() {
         const token = localStorage.getItem("token") || sessionStorage.getItem("token");
         if (!token) return;
 
-        api.get("/api/users/me")
+        api.get("/users/me")
             .then((res) => {
                 setUser(res.data);
                 setAvatarUrl(res.data?.avatarUrl || "");
@@ -26,7 +26,7 @@ export default function Settings() {
 
     const handleAvatarUpload = async (url) => {
         try {
-            await api.put(`/api/users/me`, { avatarUrl: url });
+            await api.put(`/users/me`, { avatarUrl: url });
             setAvatarUrl(url);
             setUser({ ...user, avatarUrl: url });
             toast.success("Cập nhật avatar thành công!");
@@ -40,7 +40,7 @@ export default function Settings() {
     useEffect(() => {
         const loadSettings = async () => {
             try {
-                const res = await api.get("/api/Users/me/settings");
+                const res = await api.get("/Users/me/settings");
                 const settings = res.data;
                 
                 // Sync notification settings từ backend
@@ -83,7 +83,7 @@ export default function Settings() {
         }
 
         try {
-            await api.post("/api/Users/change-password", {
+            await api.post("/Users/change-password", {
                 oldPassword,
                 newPassword,
             });
@@ -139,7 +139,7 @@ export default function Settings() {
                                     updateNotificationSettings("emailNotifications", value);
                                     // Lưu lên backend
                                     try {
-                                        await api.put("/api/Users/me/notification-settings", {
+                                        await api.put("/Users/me/notification-settings", {
                                             emailNotifications: value,
                                             messageNotifications: notifications.messageNotifications,
                                             newProjectNotifications: notifications.newProjectNotifications,
@@ -162,7 +162,7 @@ export default function Settings() {
                                     updateNotificationSettings("newProjectNotifications", value);
                                     // Lưu lên backend
                                     try {
-                                        await api.put("/api/Users/me/notification-settings", {
+                                        await api.put("/Users/me/notification-settings", {
                                             emailNotifications: notifications.emailNotifications,
                                             messageNotifications: notifications.messageNotifications,
                                             newProjectNotifications: value,
@@ -185,7 +185,7 @@ export default function Settings() {
                                     updateNotificationSettings("messageNotifications", value);
                                     // Lưu lên backend
                                     try {
-                                        await api.put("/api/Users/me/notification-settings", {
+                                        await api.put("/Users/me/notification-settings", {
                                             emailNotifications: notifications.emailNotifications,
                                             messageNotifications: value,
                                             newProjectNotifications: notifications.newProjectNotifications,
@@ -215,7 +215,7 @@ export default function Settings() {
                                     updatePrivacySettings("publicProfile", value);
                                     // Lưu lên backend
                                     try {
-                                        await api.put("/api/Users/me/privacy-settings", {
+                                        await api.put("/Users/me/privacy-settings", {
                                             publicProfile: value,
                                             showOnlineStatus: privacy.showOnlineStatus,
                                         });
@@ -237,7 +237,7 @@ export default function Settings() {
                                     updatePrivacySettings("showOnlineStatus", value);
                                     // Lưu lên backend
                                     try {
-                                        await api.put("/api/Users/me/privacy-settings", {
+                                        await api.put("/Users/me/privacy-settings", {
                                             publicProfile: privacy.publicProfile,
                                             showOnlineStatus: value,
                                         });

@@ -30,16 +30,42 @@ public class HealthController : ControllerBase
 
     // 2) Kiểm tra Mongo có try/catch – nếu fail, trả 500 nhưng KHÔNG nổ unhandled
     [HttpGet("mongo")]
-    public async Task<IActionResult> Mongo([FromServices] MongoDbContext db)
+    public async Task<IActionResult> Mongo([FromServices] MongoDbContext db, [FromServices] IOptions<MongoOptions> opt)
     {
         try
         {
+            // Test ping trước
+            await db.Database.RunCommandAsync<MongoDB.Bson.BsonDocument>(new MongoDB.Bson.BsonDocument("ping", 1));
             var names = await db.Database.ListCollectionNames().ToListAsync();
-            return Ok(new { ok = true, collections = names });
+            return Ok(new { 
+                ok = true, 
+                collections = names,
+                dbName = opt.Value.DbName,
+                connectionStringMasked = opt.Value.ConnectionString?.Substring(0, Math.Min(50, opt.Value.ConnectionString.Length)) + "..."
+            });
+        }
+        catch (MongoDB.Driver.MongoAuthenticationException ex)
+        {
+            return StatusCode(500, new { 
+                ok = false, 
+                error = "MongoDB Authentication Failed",
+                message = ex.Message,
+                details = new[] {
+                    "1. Check username and password in connection string",
+                    "2. Check IP whitelist in MongoDB Atlas Network Access",
+                    "3. Check database user permissions"
+                },
+                connectionStringMasked = opt.Value.ConnectionString?.Substring(0, Math.Min(50, opt.Value.ConnectionString.Length)) + "..."
+            });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { ok = false, error = ex.Message });
+            return StatusCode(500, new { 
+                ok = false, 
+                error = ex.GetType().Name,
+                message = ex.Message,
+                connectionStringMasked = opt.Value.ConnectionString?.Substring(0, Math.Min(50, opt.Value.ConnectionString.Length)) + "..."
+            });
         }
     }
 
