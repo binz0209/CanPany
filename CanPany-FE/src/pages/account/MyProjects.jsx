@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "../../lib/axios";
 import { jwtDecode } from "jwt-decode";
 import Button from "../../components/ui/button";
+import { useI18n } from "../../hooks/useI18n";
 
 export default function MyProjects() {
+  const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useI18n();
 
   useEffect(() => {
     const token =
@@ -24,9 +28,9 @@ export default function MyProjects() {
         ] ||
         dec.userId;
 
-      axios
+      apiService
         .get(`/projects/by-owner/${userId}`)
-        .then((res) => setProjects(res.data ?? []))
+        .then((data) => setProjects(data ?? []))
         .catch((err) => console.error(err))
         .finally(() => setLoading(false));
     } catch {
@@ -45,18 +49,18 @@ export default function MyProjects() {
 
   const gotoCreate = () => (window.location.href = "/post-project");
 
-  if (loading) return <p className="p-4">Đang tải...</p>;
+  if (loading) return <p className="p-4">{t("MyProjects.Loading")}</p>;
 
   if (!projects.length)
     return (
       <div className="container-ld py-12">
         <div className="card text-center p-10">
-          <div className="text-2xl font-semibold">Bạn chưa có dự án nào</div>
+          <div className="text-2xl font-semibold">{t("MyProjects.NoProjects")}</div>
           <p className="text-slate-600 mt-2">
-            Tạo dự án đầu tiên để bắt đầu tuyển Freelancer.
+            {t("MyProjects.NoProjectsDesc")}
           </p>
           <Button className="mt-5" onClick={gotoCreate}>
-            + Tạo dự án
+            {t("MyProjects.CreateProject")}
           </Button>
         </div>
       </div>
@@ -112,17 +116,9 @@ export default function MyProjects() {
                 <div className="mt-4 flex gap-2">
                   <Button
                     variant="outline"
-                    onClick={() => (window.location.href = `/projects/${key}`)}
+                    onClick={() => navigate(`/projects/${key}`)}
                   >
-                    Xem
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() =>
-                      (window.location.href = `/projects/edit/${key}`)
-                    }
-                  >
-                    Chỉnh sửa
+                    Xem chi tiết
                   </Button>
                 </div>
               </div>

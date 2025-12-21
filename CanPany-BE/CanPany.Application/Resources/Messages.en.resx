@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  
+  <!-- Common Error Messages -->
+  <data name="Error.Common.NotFound" xml:space="preserve">
+    <value>Resource not found</value>
+  </data>
+  <data name="Error.Common.Unauthorized" xml:space="preserve">
+    <value>You are not authorized to perform this action</value>
+  </data>
+  <data name="Error.Common.InternalServerError" xml:space="preserve">
+    <value>An unexpected error occurred. Please try again later.</value>
+  </data>
+  <data name="Error.Common.BadRequest" xml:space="preserve">
+    <value>Invalid request</value>
+  </data>
+  <data name="Error.Common.ValidationFailed" xml:space="preserve">
+    <value>Validation failed</value>
+  </data>
+
+  <!-- User Error Messages -->
+  <data name="Error.User.Register.EmailExists" xml:space="preserve">
+    <value>Email '{0}' already exists</value>
+  </data>
+  <data name="Error.User.Register.Failed" xml:space="preserve">
+    <value>Failed to register user: {0}</value>
+  </data>
+  <data name="Error.User.Login.InvalidCredentials" xml:space="preserve">
+    <value>Invalid email or password</value>
+  </data>
+  <data name="Error.User.Login.Failed" xml:space="preserve">
+    <value>Login failed: {0}</value>
+  </data>
+  <data name="Error.User.NotFound" xml:space="preserve">
+    <value>User with ID '{0}' not found</value>
+  </data>
+  <data name="Error.User.Update.Failed" xml:space="preserve">
+    <value>Failed to update user</value>
+  </data>
+  <data name="Error.User.Delete.Failed" xml:space="preserve">
+    <value>Failed to delete user</value>
+  </data>
+  <data name="Error.User.PasswordChange.Failed" xml:space="preserve">
+    <value>Failed to change password: {0}</value>
+  </data>
+  <data name="Error.User.PasswordChange.OldPasswordIncorrect" xml:space="preserve">
+    <value>Old password is incorrect</value>
+  </data>
+  <data name="Error.User.PasswordReset.EmailNotFound" xml:space="preserve">
+    <value>Email does not exist in the system</value>
+  </data>
+  <data name="Error.User.PasswordReset.CodeExpired" xml:space="preserve">
+    <value>Verification code has expired</value>
+  </data>
+  <data name="Error.User.PasswordReset.CodeInvalid" xml:space="preserve">
+    <value>Verification code is incorrect</value>
+  </data>
+  <data name="Error.User.PasswordReset.EmailSendFailed" xml:space="preserve">
+    <value>Failed to send email</value>
+  </data>
+
+  <!-- User Validation Messages -->
+  <data name="Validation.User.FullNameRequired" xml:space="preserve">
+    <value>Full name is required</value>
+  </data>
+  <data name="Validation.User.EmailRequired" xml:space="preserve">
+    <value>Email is required</value>
+  </data>
+  <data name="Validation.User.EmailInvalid" xml:space="preserve">
+    <value>Email format is invalid</value>
+  </data>
+  <data name="Validation.User.PasswordRequired" xml:space="preserve">
+    <value>Password is required</value>
+  </data>
+  <data name="Validation.User.PasswordMinLength" xml:space="preserve">
+    <value>Password must be at least {0} characters</value>
+  </data>
+  <data name="Validation.User.UserIdRequired" xml:space="preserve">
+    <value>User ID is required</value>
+  </data>
+
+  <!-- User Success Messages -->
+  <data name="Success.User.Register" xml:space="preserve">
+    <value>User registered successfully</value>
+  </data>
+  <data name="Success.User.Login" xml:space="preserve">
+    <value>Login successful</value>
+  </data>
+  <data name="Success.User.Update" xml:space="preserve">
+    <value>User updated successfully</value>
+  </data>
+  <data name="Success.User.Delete" xml:space="preserve">
+    <value>User deleted successfully</value>
+  </data>
+  <data name="Success.User.PasswordChange" xml:space="preserve">
+    <value>Password changed successfully</value>
+  </data>
+  <data name="Success.User.PasswordReset.CodeSent" xml:space="preserve">
+    <value>Verification code has been sent to your email</value>
+  </data>
+  <data name="Success.User.PasswordReset.Reset" xml:space="preserve">
+    <value>Password has been reset successfully</value>
+  </data>
+
+  <!-- User Logging Messages -->
+  <data name="Logging.User.Register.Start" xml:space="preserve">
+    <value>Starting user registration for email: {0}</value>
+  </data>
+  <data name="Logging.User.Register.Complete" xml:space="preserve">
+    <value>User registration completed for email: {0}, User ID: {1}</value>
+  </data>
+  <data name="Logging.User.Login.Start" xml:space="preserve">
+    <value>Starting login attempt for email: {0}</value>
+  </data>
+  <data name="Logging.User.Login.Complete" xml:space="preserve">
+    <value>Login successful for email: {0}, User ID: {1}</value>
+  </data>
+  <data name="Logging.User.Update.Start" xml:space="preserve">
+    <value>Starting user update for User ID: {0}</value>
+  </data>
+  <data name="Logging.User.Update.Complete" xml:space="preserve">
+    <value>User update completed for User ID: {0}</value>
+  </data>
+  <data name="Logging.User.Delete.Start" xml:space="preserve">
+    <value>Starting user deletion for User ID: {0}</value>
+  </data>
+  <data name="Logging.User.Delete.Complete" xml:space="preserve">
+    <value>User deletion completed for User ID: {0}</value>
+  </data>
+  <data name="Logging.User.PasswordChange.Start" xml:space="preserve">
+    <value>Starting password change for User ID: {0}</value>
+  </data>
+  <data name="Logging.User.PasswordChange.Complete" xml:space="preserve">
+    <value>Password change completed for User ID: {0}</value>
+  </data>
+  <data name="Logging.User.PasswordReset.Request" xml:space="preserve">
+    <value>Password reset requested for email: {0}</value>
+  </data>
+  <data name="Logging.User.PasswordReset.Complete" xml:space="preserve">
+    <value>Password reset completed for email: {0}</value>
+  </data>
+
+  <!-- Project Error Messages -->
+  <data name="Error.Project.NotFound" xml:space="preserve">
+    <value>Project with ID '{0}' not found</value>
+  </data>
+  <data name="Error.Project.Create.Failed" xml:space="preserve">
+    <value>Failed to create project: {0}</value>
+  </data>
+  <data name="Error.Project.Update.Failed" xml:space="preserve">
+    <value>Failed to update project: {0}</value>
+  </data>
+  <data name="Error.Project.Delete.Failed" xml:space="preserve">
+    <value>Failed to delete project: {0}</value>
+  </data>
+  <data name="Error.Project.Unauthorized" xml:space="preserve">
+    <value>You are not authorized to modify this project</value>
+  </data>
+
+  <!-- Project Validation Messages -->
+  <data name="Validation.Project.TitleRequired" xml:space="preserve">
+    <value>Project title is required</value>
+  </data>
+  <data name="Validation.Project.DescriptionRequired" xml:space="preserve">
+    <value>Project description is required</value>
+  </data>
+  <data name="Validation.Project.OwnerIdRequired" xml:space="preserve">
+    <value>Project owner ID is required</value>
+  </data>
+  <data name="Validation.Project.ProjectIdRequired" xml:space="preserve">
+    <value>Project ID is required</value>
+  </data>
+
+  <!-- Project Success Messages -->
+  <data name="Success.Project.Create" xml:space="preserve">
+    <value>Project created successfully</value>
+  </data>
+  <data name="Success.Project.Update" xml:space="preserve">
+    <value>Project updated successfully</value>
+  </data>
+  <data name="Success.Project.Delete" xml:space="preserve">
+    <value>Project deleted successfully</value>
+  </data>
+
+  <!-- Project Logging Messages -->
+  <data name="Logging.Project.Create.Start" xml:space="preserve">
+    <value>Starting project creation, Title: {0}, Owner ID: {1}</value>
+  </data>
+  <data name="Logging.Project.Create.Complete" xml:space="preserve">
+    <value>Project creation completed, Project ID: {0}, Title: {1}</value>
+  </data>
+  <data name="Logging.Project.Update.Start" xml:space="preserve">
+    <value>Starting project update for Project ID: {0}</value>
+  </data>
+  <data name="Logging.Project.Update.Complete" xml:space="preserve">
+    <value>Project update completed for Project ID: {0}</value>
+  </data>
+  <data name="Logging.Project.Delete.Start" xml:space="preserve">
+    <value>Starting project deletion for Project ID: {0}</value>
+  </data>
+  <data name="Logging.Project.Delete.Complete" xml:space="preserve">
+    <value>Project deletion completed for Project ID: {0}</value>
+  </data>
+
+  <!-- Background Job Messages -->
+  <data name="Error.BackgroundJob.ProcessFailed" xml:space="preserve">
+    <value>Background job processing failed: {0}</value>
+  </data>
+  <data name="Error.BackgroundJob.HandlerNotFound" xml:space="preserve">
+    <value>No handler found for job type: {0}</value>
+  </data>
+  <data name="Logging.BackgroundJob.ProcessStart" xml:space="preserve">
+    <value>Processing background job, Job ID: {0}, Job Type: {1}</value>
+  </data>
+  <data name="Logging.BackgroundJob.ProcessComplete" xml:space="preserve">
+    <value>Background job completed successfully, Job ID: {0}</value>
+  </data>
+  <data name="Logging.BackgroundJob.ProcessFailed" xml:space="preserve">
+    <value>Background job processing failed, Job ID: {0}, Error: {1}</value>
+  </data>
+
+  <!-- Status Messages -->
+  <data name="Status.Processing" xml:space="preserve">
+    <value>Processing...</value>
+  </data>
+  <data name="Status.Completed" xml:space="preserve">
+    <value>Completed</value>
+  </data>
+  <data name="Status.Failed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="Status.Pending" xml:space="preserve">
+    <value>Pending</value>
+  </data>
+</root>
+
+
+
+

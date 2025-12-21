@@ -1,14 +1,17 @@
 // src/pages/Projects.jsx
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import SearchBar from "../../components/SearchBar";
 import StatCard from "../../components/StatCard";
 import Progress from "../../components/ui/progress";
 import Button from "../../components/ui/button";
-import axios from "../../lib/axios";
+import apiService from "../../lib/api.service";
 import { jwtDecode } from "jwt-decode";
 import Spinner from "../../components/Spinner";
+import { useI18n } from "../../hooks/useI18n";
 
 export default function Projects() {
+  const { t } = useI18n();
   const [projects, setProjects] = useState([]);
   const [statsBase, setStatsBase] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -188,30 +191,30 @@ export default function Projects() {
 
   // ===== categories & skills =====
   useEffect(() => {
-    axios
-      .get("api/categories")
-      .then((r) => setCategories(r.data || []))
+    apiService
+      .get("/categories")
+      .then((data) => setCategories(data || []))
       .catch((e) => console.error(e));
-    axios
-      .get("api/skills")
-      .then((r) => setSkills(r.data || []))
+    apiService
+      .get("/skills")
+      .then((data) => setSkills(data || []))
       .catch((e) => console.error("Skills error:", e));
   }, []);
 
   // ===== stats base (ALL) =====
   useEffect(() => {
-    axios
-      .get("api/projects")
-      .then((res) => setStatsBase(res.data || []))
+    apiService
+      .get("/projects")
+      .then((data) => setStatsBase(data || []))
       .catch((err) => console.error("Load all projects for stats error:", err));
   }, []);
 
   // ===== load all projects (filtering will be done client-side) =====
   useEffect(() => {
     setLoading(true);
-    axios
-      .get("api/projects")
-      .then((res) => setProjects(res.data || []))
+    apiService
+      .get("/projects")
+      .then((data) => setProjects(data || []))
       .catch((err) => console.error("Load projects error:", err))
       .finally(() => setLoading(false));
   }, []);
@@ -220,12 +223,12 @@ export default function Projects() {
   useEffect(() => {
     if (sortOrder === "related" && currentUserId) {
       setLoadingRecommended(true);
-      axios
-        .get("api/projects/recommended?limit=100")
-        .then((res) => {
-          const data = res.data || [];
+      apiService
+        .get("/projects/recommended?limit=100")
+        .then((data) => {
+          const items = data || [];
           setRecommendedProjects(
-            data.map((item) => ({
+            items.map((item) => ({
               ...item.project,
               similarity: item.similarity,
             }))
@@ -242,8 +245,8 @@ export default function Projects() {
   }, [sortOrder, currentUserId]);
 
   const catName = useCallback(
-    (id) => categories.find((c) => c.id === id)?.name || "Khác",
-    [categories]
+    (id) => categories.find((c) => c.id === id)?.name || t("Projects.Other"),
+    [categories, t]
   );
 
   // map skillIds -> names
@@ -289,7 +292,7 @@ export default function Projects() {
   // ➕ Tạo mới
   const startCreate = () => {
     if (!currentUserId) {
-      alert("Bạn chưa đăng nhập!");
+      alert(t("Common.NotLoggedIn"));
       return;
     }
     setErrors({});
@@ -312,15 +315,15 @@ export default function Projects() {
 
   const validate = () => {
     const e = {};
-    if (!editing.title?.trim()) e.title = "Vui lòng nhập tiêu đề";
-    if (!editing.description?.trim()) e.description = "Vui lòng nhập mô tả";
+    if (!editing.title?.trim()) e.title = t("Projects.PleaseEnterTitle");
+    if (!editing.description?.trim()) e.description = t("Projects.PleaseEnterDescription");
     if (
       Number.isNaN(Number(editing.budgetAmount)) ||
       Number(editing.budgetAmount) < 0
     ) {
-      e.budgetAmount = "Ngân sách không hợp lệ";
+      e.budgetAmount = t("Projects.InvalidBudget");
     }
-    if (!editing.categoryId) e.categoryId = "Vui lòng chọn danh mục";
+    if (!editing.categoryId) e.categoryId = t("Projects.PleaseSelectCategory");
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -345,13 +348,13 @@ export default function Projects() {
           status: editing.status,
           categoryId: editing.categoryId,
         };
-        const res = await axios.post("api/projects", payloadCreate); // POST /api/projects
-        savedProject = res.data ?? payloadCreate;
+        const data = await apiService.post("/projects", payloadCreate);
+        savedProject = data ?? payloadCreate;
 
         // đồng bộ skills
         if (Array.isArray(editing.skillIds)) {
           try {
-            await axios.post("api/projectskills/sync", {
+            await apiService.post("/projectskills/sync", {
               projectId: editing.id || savedProject.id,
               skillIds: editing.skillIds || [],
             });
@@ -382,14 +385,14 @@ export default function Projects() {
           categoryId: editing.categoryId,
           updatedAt: new Date().toISOString(),
         };
-        const res = await axios.put(
-          `api/projects/${editing.id}`,
+        const data = await apiService.put(
+          `/projects/${editing.id}`,
           payloadUpdate
         );
-        savedProject = res.data ?? payloadUpdate;
+        savedProject = data ?? payloadUpdate;
 
         try {
-          await axios.post("api/projectskills/sync", {
+          await apiService.post("/projectskills/sync", {
             projectId: editing.id,
             skillIds: editing.skillIds || [],
           });
@@ -417,9 +420,9 @@ export default function Projects() {
         err?.response?.data?.message ||
         err?.response?.data ||
         err?.message ||
-        "Lưu thất bại";
+        t("Common.SaveFailed");
       console.error("Save project error:", err?.response || err);
-      setApiError(typeof msg === "string" ? msg : "Không lưu được thay đổi.");
+      setApiError(typeof msg === "string" ? msg : t("Common.CannotSave"));
     } finally {
       setSaving(false);
     }
@@ -455,8 +458,8 @@ export default function Projects() {
   return (
     <div className="container-ld py-8 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Dự án cần tuyển Freelancer</h1>
-        <Button onClick={startCreate}>+ Dự án mới</Button>
+        <h1 className="text-2xl font-semibold">{t("Projects.NeedFreelancer")}</h1>
+        <Button onClick={startCreate}>{t("Projects.NewProject")}</Button>
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -464,7 +467,7 @@ export default function Projects() {
         <input
           type="text"
           className="input w-full md:w-1/2"
-          placeholder="Tìm dự án theo tiêu đề hoặc mô tả..."
+          placeholder={t("Projects.SearchPlaceholder")}
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
         />
@@ -506,7 +509,7 @@ export default function Projects() {
             activeFilter === "ALL" ? "ring-2 ring-brand-500" : ""
           }`}
         >
-          <StatCard icon={"📦"} label="Tổng dự án" value={statsBase.length} />
+          <StatCard icon={"📦"} label={t("Projects.TotalProjects")} value={statsBase.length} />
         </div>
         <div
           role="button"
@@ -515,7 +518,7 @@ export default function Projects() {
             activeFilter === "Open" ? "ring-2 ring-brand-500" : ""
           }`}
         >
-          <StatCard icon={"🟢"} label="Đang mở" value={countOpen} />
+          <StatCard icon={"🟢"} label={t("Projects.Open")} value={countOpen} />
         </div>
         <div
           role="button"
@@ -526,7 +529,7 @@ export default function Projects() {
         >
           <StatCard
             icon={"⏳"}
-            label="Đang thực hiện"
+            label={t("Projects.InProgress")}
             value={countInProgress}
           />
         </div>
@@ -537,9 +540,9 @@ export default function Projects() {
             activeFilter === "Completed" ? "ring-2 ring-brand-500" : ""
           }`}
         >
-          <StatCard icon={"✅"} label="Hoàn thành" value={countCompleted} />
+          <StatCard icon={"✅"} label={t("Projects.Completed")} value={countCompleted} />
         </div>
-        <StatCard icon={"💰"} label="Tổng ngân sách" value={totalBudget} />
+        <StatCard icon={"💰"} label={t("Projects.TotalBudget")} value={totalBudget} />
       </div>
 
       {/* List */}
@@ -547,10 +550,10 @@ export default function Projects() {
       {loading ? (
           <div className="card p-6 flex items-center justify-center gap-3">
             <Spinner />
-            <span>Đang tải dự án…</span>
+            <span>{t("Common.Loading")}</span>
           </div>
       ) : filteredProjects.length === 0 ? (
-        <div className="card p-6">Không có dự án phù hợp.</div>
+        <div className="card p-6">{t("Common.NoData")}</div>
       ) : (
           <>
             {displayedProjects.map((p) => {
@@ -588,7 +591,7 @@ export default function Projects() {
                   </div>
                   <div className="text-right min-w-[140px] ml-4">
                     <div className="text-xs uppercase tracking-wide text-slate-500">
-                      Ngân sách
+                      {t("Projects.BudgetLabel")}
                     </div>
                     <div className="text-brand-700 font-semibold">
                       {p.budgetAmount?.toLocaleString("vi-VN") ?? "—"} đ
@@ -597,7 +600,7 @@ export default function Projects() {
                 </div>
                 <div className="mt-4 flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
-                    <span>Trạng thái:</span>
+                    <span>{t("Projects.StatusLabel")}:</span>
                     <span
                       className={`font-semibold ${
                         p.status === "Open"
@@ -698,7 +701,7 @@ export default function Projects() {
                         coverLetter: e.target.value,
                       })
                     }
-                    placeholder="Viết vài dòng giới thiệu về bạn..."
+                    placeholder={t("Profile.BioPlaceholder")}
                   />
                 </div>
 
@@ -724,14 +727,14 @@ export default function Projects() {
               {/* Footer */}
               <div className="p-4 border-t flex items-center justify-end gap-2">
                 <Button variant="outline" onClick={() => setConfirmJob(null)}>
-                  Hủy
+                  {t("Common.Cancel")}
                 </Button>
                 <Button
                   onClick={async () => {
                     try {
                       const cover =
                         (confirmJob.coverLetter || "").trim() ||
-                        "Tôi quan tâm đến dự án này và muốn ứng tuyển.";
+                        t("Projects.InterestedInProject");
 
                       // nếu bỏ trống bid -> theo budgetAmount của project
                       const numericBid =
@@ -756,8 +759,8 @@ export default function Projects() {
                       };
                       console.log("Proposal payload:", proposalPayload);
 
-                      const { data: createdProposal } = await axios.post(
-                        "api/proposals",
+                      const createdProposal = await apiService.post(
+                        "/proposals",
                         proposalPayload
                       );
 
@@ -779,14 +782,14 @@ export default function Projects() {
                       };
                       console.log("Message(proposal) payload:", messagePayload);
 
-                      await axios.post("api/messages/proposal", messagePayload);
+                      await apiService.post("/messages/proposal", messagePayload);
 
                       // alert("Đã gửi proposal và tin nhắn tới chủ dự án.");
                     } catch (err) {
                       console.error("Proposal error:", err?.response || err);
                       alert(
                         err?.response?.data?.detail ||
-                          "Không thể gửi proposal. Thử lại sau."
+                          t("Projects.CannotSendProposal")
                       );
                     } finally {
                       setConfirmJob(null);
@@ -812,7 +815,7 @@ export default function Projects() {
             <div className="rounded-2xl bg-white shadow-2xl border border-slate-200">
               <div className="p-4 border-b flex items-center justify-between">
                 <div className="font-semibold">
-                  {editing.id ? "Chỉnh sửa dự án" : "Tạo dự án mới"}
+                  {editing.id ? t("Projects.EditProject") : t("Projects.CreateProject")}
                 </div>
                 <button className="btn btn-sm btn-ghost" onClick={closeEdit}>
                   ✕
@@ -828,7 +831,7 @@ export default function Projects() {
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium">Tiêu đề</label>
+                    <label className="text-sm font-medium">{t("Projects.TitleLabel")}</label>
                     <input
                       className={`input mt-1 w-full ${
                         errors.title ? "border-red-500" : ""
@@ -837,7 +840,7 @@ export default function Projects() {
                       onChange={(e) =>
                         setEditing((s) => ({ ...s, title: e.target.value }))
                       }
-                      placeholder="Nhập tiêu đề dự án"
+                      placeholder={t("Projects.TitlePlaceholder")}
                     />
                     {errors.title && (
                       <p className="text-xs text-red-600 mt-1">
@@ -847,7 +850,7 @@ export default function Projects() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium">Danh mục</label>
+                    <label className="text-sm font-medium">{t("Projects.CategoryLabel")}</label>
                     <select
                       className={`select mt-1 w-full ${
                         errors.categoryId ? "border-red-500" : ""
@@ -860,7 +863,7 @@ export default function Projects() {
                         }))
                       }
                     >
-                      <option value="">— Chọn danh mục —</option>
+                      <option value="">{t("Projects.SelectCategory")}</option>
                       {categories.map((c) => (
                         <option key={c.id} value={c.id}>
                           {c.name}
@@ -876,7 +879,7 @@ export default function Projects() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium">Mô tả</label>
+                  <label className="text-sm font-medium">{t("Projects.DescriptionLabel")}</label>
                   <textarea
                     rows={4}
                     className={`textarea mt-1 w-full ${
@@ -886,7 +889,7 @@ export default function Projects() {
                     onChange={(e) =>
                       setEditing((s) => ({ ...s, description: e.target.value }))
                     }
-                    placeholder="Mô tả chi tiết yêu cầu..."
+                    placeholder={t("Projects.DescriptionPlaceholder")}
                   />
                   {errors.description && (
                     <p className="text-xs text-red-600 mt-1">
@@ -897,7 +900,7 @@ export default function Projects() {
 
                 <div className="grid md:grid-cols-3 gap-4">
                   <div>
-                    <label className="text-sm font-medium">Ngân sách (đ)</label>
+                    <label className="text-sm font-medium">{t("Projects.BudgetLabel")}</label>
                     <input
                       type="number"
                       className={`input mt-1 w-full ${
@@ -921,7 +924,7 @@ export default function Projects() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium">Trạng thái</label>
+                    <label className="text-sm font-medium">{t("Projects.StatusLabel")}</label>
                     <select
                       className="select mt-1 w-full"
                       value={editing.status}
@@ -938,7 +941,7 @@ export default function Projects() {
 
                   {/* === Multi-select Skills từ DB === */}
                   <div className="md:col-span-1">
-                    <label className="text-sm font-medium">Kỹ năng</label>
+                    <label className="text-sm font-medium">{t("Projects.SkillsLabel")}</label>
                     <SkillMultiSelect
                       skills={skills}
                       value={editing.skillIds}
@@ -952,14 +955,14 @@ export default function Projects() {
 
               <div className="p-4 border-t flex items-center justify-end gap-2">
                 <Button variant="outline" onClick={closeEdit} disabled={saving}>
-                  Hủy
+                  {t("Common.Cancel")}
                 </Button>
                 <Button onClick={save} disabled={saving}>
                   {saving
-                    ? "Đang lưu..."
+                    ? t("Projects.Saving")
                     : editing.id
-                    ? "Lưu thay đổi"
-                    : "Tạo dự án"}
+                    ? t("Projects.SaveChanges")
+                    : t("Projects.CreateProjectButton")}
                 </Button>
               </div>
             </div>
@@ -1021,13 +1024,13 @@ export default function Projects() {
 
                   <div className="text-right min-w-[160px]">
                     <div className="text-xs uppercase tracking-wide text-slate-500">
-                      Ngân sách
+                      {t("Projects.BudgetLabel")}
                     </div>
                     <div className="text-brand-700 font-semibold">
                       {viewing.budgetAmount?.toLocaleString("vi-VN") ?? "—"} đ
                     </div>
                     <div className="mt-2 text-xs text-slate-600">
-                      Trạng thái:{" "}
+                      {t("Projects.StatusLabel")}:{" "}
                       <span className="badge badge-outline">
                         {viewing.status}
                       </span>
@@ -1101,7 +1104,7 @@ function SkillMultiSelect({ skills, value = [], onChange }) {
     <div className="mt-1 w-full">
       <input
         className="input w-full mb-2"
-        placeholder="Tìm kỹ năng…"
+        placeholder={t("Projects.SearchSkillsPlaceholder")}
         value={q}
         onChange={(e) => setQ(e.target.value)}
       />

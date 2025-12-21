@@ -33,6 +33,7 @@ const AdminLayout = () => {
     { name: "Đơn hàng", icon: FileText, path: "/admin/contracts" },
     { name: "Banners", icon: FileText, path: "/admin/banners" },
     { name: "Thống kê", icon: BarChart3, path: "/admin/statistics" },
+    { name: "Audit Logs", icon: FileText, path: "/admin/audit-logs" },
     { name: "Cài đặt", icon: Settings, path: "/admin/settings" },
   ];
 

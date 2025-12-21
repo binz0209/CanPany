@@ -2,14 +2,16 @@ import { useEffect, useState } from "react";
 import Input from "../../components/ui/input";
 import Button from "../../components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../../lib/api";
+import apiService from "../../lib/api.service";
 import { jwtDecode } from "jwt-decode";
 import { GoogleLogin } from "@react-oauth/google";
 import { toast } from "sonner";
 import { useNotificationStore } from "../../stores/notificationStore";
+import { useI18n } from "../../hooks/useI18n";
 
 export default function Login() {
   const nav = useNavigate();
+  const { t } = useI18n();
 
   // ✅ Thêm rememberMe trong state form
   const [form, setForm] = useState({
@@ -29,20 +31,24 @@ export default function Login() {
   const onSubmit = async (e) => {
     e.preventDefault();
     if (!form.email || !form.password)
-      return setErr("Vui lòng nhập đủ thông tin.");
+      return setErr(t("Common.PleaseEnterInfo"));
 
     setErr("");
     setLoading(true);
     try {
       // ✅ Gửi rememberMe lên server
-      const res = await api.post("/auth/login", {
+      const response = await apiService.post("/auth/login", {
         email: form.email,
         password: form.password,
         rememberMe: form.rememberMe,
       });
 
-      const token = res.data?.accessToken || res.data?.token;
-      if (!token) throw new Error("Không nhận được token từ server");
+      // apiService đã extract data từ ApiResponse, response là { accessToken, expiresIn }
+      const token = response?.accessToken || response?.token;
+      if (!token) {
+        console.error("Login response:", response);
+        throw new Error(t("Auth.NoTokenFromServer"));
+      }
 
       // ✅ Lưu token theo lựa chọn Remember Me
       if (form.rememberMe) {
@@ -51,8 +57,7 @@ export default function Login() {
         sessionStorage.setItem("token", token);
       }
 
-      // Gắn header mặc định ngay lập tức cho các request sau login
-      api.defaults.headers.common.Authorization = `Bearer ${token}`;
+      // Token sẽ được tự động gắn bởi api interceptor
 
       // Decode JWT để lấy thông tin user
       const decoded = jwtDecode(token);
@@ -114,7 +119,7 @@ export default function Login() {
       const msg =
         error?.response?.data?.message ||
         error?.message ||
-        "Đăng nhập thất bại";
+        t("Auth.LoginFailed");
       setErr(msg);
     } finally {
       setLoading(false);
@@ -122,15 +127,23 @@ export default function Login() {
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
+    // Check if credentialResponse is valid
+    if (!credentialResponse?.credential) {
+      toast.error(t("Auth.NoTokenFromGoogle"));
+      return;
+    }
     try {
       const idToken = credentialResponse.credential;
-      const res = await api.post("/auth/google", { idToken });
+      const response = await apiService.post("/auth/google", { idToken });
 
-      const token = res.data?.accessToken;
-      if (!token) throw new Error("Google login failed: No token");
+      // apiService đã extract data từ ApiResponse, response là { accessToken, expiresIn }
+      const token = response?.accessToken || response?.token;
+      if (!token) {
+        console.error("Google login response:", response);
+        throw new Error("Google login failed: No token");
+      }
 
       localStorage.setItem("token", token);
-      api.defaults.headers.common.Authorization = `Bearer ${token}`;
 
       const decoded = jwtDecode(token);
       console.log("Decoded JWT (Google):", decoded);
@@ -170,31 +183,31 @@ export default function Login() {
       await notifStore.initConnection(); // 🔗 Kết nối SignalR bằng token mới
       console.log("UserData saved (Google):", userData);
 
-      toast.success("Đăng nhập bằng Google thành công!");
+      toast.success(t("Auth.LoginSuccess"));
       nav("/", { replace: true });
     } catch (err) {
       console.error("Google login error:", err);
-      toast.error(err.response?.data?.message || "Đăng nhập Google thất bại");
+      toast.error(err?.message || err?.response?.data?.message || t("Auth.LoginFailed"));
     }
   };
 
   const handleSendCode = async () => {
-    if (!email) return toast.error("Vui lòng nhập email.");
+    if (!email) return toast.error(t("Common.PleaseEnterInfo"));
     try {
-      await api.post("/auth/forgot-password", { email });
-      toast.success("Đã gửi mã xác nhận đến email của bạn!");
+      await apiService.post("/auth/forgot-password", { email });
+      toast.success(t("Auth.SendCodeSuccess"));
       setStep(2);
     } catch (err) {
-      toast.error(err.response?.data?.message || "Không thể gửi mã xác nhận.");
+      toast.error(err?.message || err?.response?.data?.message || t("Auth.CannotSendCode"));
     }
   };
 
   const handleResetPassword = async () => {
     if (!code || !newPassword)
-      return toast.error("Vui lòng nhập đầy đủ thông tin.");
+      return toast.error(t("Common.PleaseEnterFullInfo"));
     try {
-      await api.post("/auth/reset-password", { email, code, newPassword });
-      toast.success("Đặt lại mật khẩu thành công!");
+      await apiService.post("/auth/reset-password", { email, code, newPassword });
+      toast.success(t("Auth.ResetPasswordSuccess"));
       setShowForgot(false);
       setStep(1);
       setEmail("");
@@ -210,19 +223,19 @@ export default function Login() {
       <div className="hidden md:block">
         <div className="h-80 rounded-2xl bg-gradient-to-br from-blue-200 to-orange-200" />
         <h2 className="mt-6 text-2xl font-semibold">
-          Chào mừng trở lại LanServe
+          {t("Auth.WelcomeBack")}
         </h2>
         <p className="text-slate-600 mt-2">
-          Đăng nhập để quản lý dự án, trao đổi và nhận việc nhanh chóng.
+          {t("Auth.LoginDescription")}
         </p>
       </div>
 
       <div className="card">
         <form className="card-body space-y-4" onSubmit={onSubmit}>
-          <h1 className="text-2xl font-semibold">Đăng nhập</h1>
+          <h1 className="text-2xl font-semibold">{t("Auth.Login")}</h1>
           {err && <div className="text-sm text-red-600">{err}</div>}
           <div>
-            <label className="text-sm">Email</label>
+            <label className="text-sm">{t("Auth.Email")}</label>
             <Input
               type="email"
               placeholder="you@example.com"
@@ -231,7 +244,7 @@ export default function Login() {
             />
           </div>
           <div>
-            <label className="text-sm">Mật khẩu</label>
+            <label className="text-sm">{t("Auth.Password")}</label>
             <Input
               type="password"
               placeholder="••••••••"
@@ -250,32 +263,38 @@ export default function Login() {
                   setForm({ ...form, rememberMe: e.target.checked })
                 }
               />
-              Ghi nhớ đăng nhập
+              {t("Auth.RememberMe")}
             </label>
             <button
               type="button"
               onClick={() => setShowForgot(true)}
               className="text-brand-700 hover:underline"
             >
-              Quên mật khẩu?
+              {t("Auth.ForgotPassword")}
             </button>
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+            {loading ? t("Auth.LoggingIn") : t("Auth.Login")}
           </Button>
 
           <div className="flex justify-center mt-4">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
-              onError={() => toast.error("Google Login thất bại")}
+              onError={(error) => {
+                console.warn("Google Login error (may be due to origin not configured):", error);
+                // Only show toast if it's not a configuration error
+                if (error?.error !== "popup_closed_by_user") {
+                  toast.error(t("Auth.GoogleLoginUnavailable"));
+                }
+              }}
             />
           </div>
 
           <div className="text-sm text-center text-slate-600">
-            Chưa có tài khoản?{" "}
+            {t("Auth.NoAccount")}{" "}
             <Link to="/register" className="text-brand-700 hover:underline">
-              Đăng ký
+              {t("Auth.Register")}
             </Link>
           </div>
         </form>
@@ -285,13 +304,13 @@ export default function Login() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 shadow-lg w-full max-w-md space-y-4">
             <h2 className="text-xl font-semibold text-center">
-              {step === 1 ? "Quên mật khẩu" : "Đặt lại mật khẩu"}
+              {step === 1 ? t("Auth.ForgotPasswordTitle") : t("Auth.ResetPasswordTitle")}
             </h2>
 
             {step === 1 ? (
               <>
                 <p className="text-sm text-slate-600">
-                  Nhập email để nhận mã xác nhận đặt lại mật khẩu.
+                  {t("Auth.ForgotPasswordDescription")}
                 </p>
                 <Input
                   placeholder="you@example.com"
@@ -303,21 +322,21 @@ export default function Login() {
                     variant="outline"
                     onClick={() => setShowForgot(false)}
                   >
-                    Hủy
+                    {t("Common.Cancel")}
                   </Button>
-                  <Button onClick={handleSendCode}>Gửi mã</Button>
+                  <Button onClick={handleSendCode}>{t("Auth.SendCode")}</Button>
                 </div>
               </>
             ) : (
               <>
                 <Input
-                  placeholder="Mã xác nhận"
+                  placeholder={t("Auth.VerificationCode")}
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                 />
                 <Input
                   type="password"
-                  placeholder="Mật khẩu mới"
+                  placeholder={t("Auth.NewPassword")}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                 />
@@ -326,9 +345,9 @@ export default function Login() {
                     variant="outline"
                     onClick={() => setShowForgot(false)}
                   >
-                    Hủy
+                    {t("Common.Cancel")}
                   </Button>
-                  <Button onClick={handleResetPassword}>Đổi mật khẩu</Button>
+                  <Button onClick={handleResetPassword}>{t("Auth.ChangePassword")}</Button>
                 </div>
               </>
             )}

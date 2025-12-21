@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  
+  <!-- Error Messages -->
+  <data name="Error_UserNotFound" xml:space="preserve">
+    <value>User not found</value>
+  </data>
+  <data name="Error_EmailExists" xml:space="preserve">
+    <value>Email already exists</value>
+  </data>
+  <data name="Error_InvalidCredentials" xml:space="preserve">
+    <value>Invalid email or password</value>
+  </data>
+  <data name="Error_Unauthorized" xml:space="preserve">
+    <value>You are not authorized to perform this action</value>
+  </data>
+  <data name="Error_ValidationFailed" xml:space="preserve">
+    <value>Validation failed</value>
+  </data>
+  <data name="Error_InternalServer" xml:space="preserve">
+    <value>An unexpected error occurred. Please try again later</value>
+  </data>
+  <data name="Error_ProjectNotFound" xml:space="preserve">
+    <value>Project not found</value>
+  </data>
+  <data name="Error_InvalidOperation" xml:space="preserve">
+    <value>Invalid operation</value>
+  </data>
+  <data name="Error_PasswordChangeFailed" xml:space="preserve">
+    <value>Failed to change password</value>
+  </data>
+  <data name="Error_OldPasswordIncorrect" xml:space="preserve">
+    <value>Old password is incorrect</value>
+  </data>
+  <data name="Error_EmailNotSent" xml:space="preserve">
+    <value>Failed to send email</value>
+  </data>
+  <data name="Error_InvalidResetCode" xml:space="preserve">
+    <value>Invalid or expired reset code</value>
+  </data>
+  
+  <!-- Success Messages -->
+  <data name="Success_UserCreated" xml:space="preserve">
+    <value>User created successfully</value>
+  </data>
+  <data name="Success_UserUpdated" xml:space="preserve">
+    <value>User updated successfully</value>
+  </data>
+  <data name="Success_UserDeleted" xml:space="preserve">
+    <value>User deleted successfully</value>
+  </data>
+  <data name="Success_Login" xml:space="preserve">
+    <value>Login successful</value>
+  </data>
+  <data name="Success_Logout" xml:space="preserve">
+    <value>Logout successful</value>
+  </data>
+  <data name="Success_PasswordChanged" xml:space="preserve">
+    <value>Password changed successfully</value>
+  </data>
+  <data name="Success_PasswordReset" xml:space="preserve">
+    <value>Password reset successfully</value>
+  </data>
+  <data name="Success_ResetCodeSent" xml:space="preserve">
+    <value>Reset code has been sent to your email</value>
+  </data>
+  <data name="Success_ProjectCreated" xml:space="preserve">
+    <value>Project created successfully</value>
+  </data>
+  <data name="Success_ProjectUpdated" xml:space="preserve">
+    <value>Project updated successfully</value>
+  </data>
+  <data name="Success_ProjectDeleted" xml:space="preserve">
+    <value>Project deleted successfully</value>
+  </data>
+  
+  <!-- Validation Messages -->
+  <data name="Validation_Required" xml:space="preserve">
+    <value>{0} is required</value>
+  </data>
+  <data name="Validation_EmailInvalid" xml:space="preserve">
+    <value>Invalid email format</value>
+  </data>
+  <data name="Validation_PasswordTooShort" xml:space="preserve">
+    <value>Password must be at least {0} characters</value>
+  </data>
+  <data name="Validation_PasswordMismatch" xml:space="preserve">
+    <value>Passwords do not match</value>
+  </data>
+  <data name="Validation_StringLength" xml:space="preserve">
+    <value>{0} must be between {1} and {2} characters</value>
+  </data>
+  
+  <!-- Status Messages -->
+  <data name="Status_Processing" xml:space="preserve">
+    <value>Processing...</value>
+  </data>
+  <data name="Status_Completed" xml:space="preserve">
+    <value>Completed</value>
+  </data>
+  <data name="Status_Failed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="Status_Pending" xml:space="preserve">
+    <value>Pending</value>
+  </data>
+  <data name="Status_Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="Status_Inactive" xml:space="preserve">
+    <value>Inactive</value>
+  </data>
+</root>
+

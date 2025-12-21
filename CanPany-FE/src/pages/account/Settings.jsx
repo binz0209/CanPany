@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Input from "../../components/ui/input";
 import Button from "../../components/ui/button";
-import api from "../../lib/axios";
+import apiService from "../../lib/api.service";
 import { toast } from "sonner";
 import { useSettingsStore } from "../../stores/settingsStore";
 import ImageUpload from "../../components/ImageUpload";
@@ -16,17 +16,17 @@ export default function Settings() {
         const token = localStorage.getItem("token") || sessionStorage.getItem("token");
         if (!token) return;
 
-        api.get("/users/me")
-            .then((res) => {
-                setUser(res.data);
-                setAvatarUrl(res.data?.avatarUrl || "");
+        apiService.get("/users/me")
+            .then((data) => {
+                setUser(data);
+                setAvatarUrl(data?.avatarUrl || "");
             })
             .catch((err) => console.error("Get user error:", err));
     }, []);
 
     const handleAvatarUpload = async (url) => {
         try {
-            await api.put(`/users/me`, { avatarUrl: url });
+            await apiService.put(`/users/me`, { avatarUrl: url });
             setAvatarUrl(url);
             setUser({ ...user, avatarUrl: url });
             toast.success("Cập nhật avatar thành công!");
@@ -40,8 +40,7 @@ export default function Settings() {
     useEffect(() => {
         const loadSettings = async () => {
             try {
-                const res = await api.get("/Users/me/settings");
-                const settings = res.data;
+                const settings = await apiService.get("/Users/me/settings");
                 
                 // Sync notification settings từ backend
                 if (settings?.notificationSettings) {
@@ -83,7 +82,7 @@ export default function Settings() {
         }
 
         try {
-            await api.post("/Users/change-password", {
+            await apiService.post("/Users/change-password", {
                 oldPassword,
                 newPassword,
             });
@@ -139,7 +138,7 @@ export default function Settings() {
                                     updateNotificationSettings("emailNotifications", value);
                                     // Lưu lên backend
                                     try {
-                                        await api.put("/Users/me/notification-settings", {
+                                        await apiService.put("/Users/me/notification-settings", {
                                             emailNotifications: value,
                                             messageNotifications: notifications.messageNotifications,
                                             newProjectNotifications: notifications.newProjectNotifications,
@@ -162,7 +161,7 @@ export default function Settings() {
                                     updateNotificationSettings("newProjectNotifications", value);
                                     // Lưu lên backend
                                     try {
-                                        await api.put("/Users/me/notification-settings", {
+                                        await apiService.put("/Users/me/notification-settings", {
                                             emailNotifications: notifications.emailNotifications,
                                             messageNotifications: notifications.messageNotifications,
                                             newProjectNotifications: value,
@@ -185,7 +184,7 @@ export default function Settings() {
                                     updateNotificationSettings("messageNotifications", value);
                                     // Lưu lên backend
                                     try {
-                                        await api.put("/Users/me/notification-settings", {
+                                        await apiService.put("/Users/me/notification-settings", {
                                             emailNotifications: notifications.emailNotifications,
                                             messageNotifications: value,
                                             newProjectNotifications: notifications.newProjectNotifications,
@@ -215,7 +214,7 @@ export default function Settings() {
                                     updatePrivacySettings("publicProfile", value);
                                     // Lưu lên backend
                                     try {
-                                        await api.put("/Users/me/privacy-settings", {
+                                        await apiService.put("/Users/me/privacy-settings", {
                                             publicProfile: value,
                                             showOnlineStatus: privacy.showOnlineStatus,
                                         });
@@ -237,7 +236,7 @@ export default function Settings() {
                                     updatePrivacySettings("showOnlineStatus", value);
                                     // Lưu lên backend
                                     try {
-                                        await api.put("/Users/me/privacy-settings", {
+                                        await apiService.put("/Users/me/privacy-settings", {
                                             publicProfile: privacy.publicProfile,
                                             showOnlineStatus: value,
                                         });

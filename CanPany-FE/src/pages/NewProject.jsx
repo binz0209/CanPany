@@ -7,9 +7,11 @@ import ImageUpload from "../components/ImageUpload";
 import api from "../lib/axios";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
+import { useI18n } from "../hooks/useI18n";
 
 export default function NewProject() {
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   // form state
   const [title, setTitle] = useState("");
@@ -80,13 +82,13 @@ export default function NewProject() {
   };
 
   const validate = () => {
-    if (!currentUserId) return "Bạn chưa đăng nhập.";
-    if (!title.trim()) return "Vui lòng nhập tiêu đề dự án.";
-    if (!description.trim()) return "Vui lòng nhập mô tả dự án.";
-    if (!categoryId) return "Vui lòng chọn danh mục.";
+    if (!currentUserId) return t("Common.NotLoggedIn");
+    if (!title.trim()) return t("Projects.PleaseEnterTitle");
+    if (!description.trim()) return t("Projects.PleaseEnterDescription");
+    if (!categoryId) return t("Projects.PleaseSelectCategory");
     if (!budgetAmount || Number(budgetAmount) <= 0)
-      return "Ngân sách không hợp lệ.";
-    if (!deadline) return "Vui lòng chọn thời hạn hoàn thành.";
+      return t("Projects.InvalidBudget");
+    if (!deadline) return t("NewProject.PleaseSelectDeadline");
     return "";
   };
 
@@ -135,10 +137,10 @@ export default function NewProject() {
         const balance = await getWalletBalance(currentUserId);
         if (balance < required) {
           alert(
-            `Số dư ví không đủ để chi trả cho dự án này.\n` +
-              `Cần: ${required.toLocaleString("vi-VN")} VND\n` +
-              `Hiện có: ${balance.toLocaleString("vi-VN")} VND\n\n` +
-              `Vui lòng nạp thêm tiền trước khi đăng dự án.`
+            `${t("NewProject.InsufficientBalance")}\n` +
+              `${t("NewProject.Required")}: ${required.toLocaleString("vi-VN")} VND\n` +
+              `${t("NewProject.CurrentBalance")}: ${balance.toLocaleString("vi-VN")} VND\n\n` +
+              `${t("NewProject.PleaseTopUp")}`
           );
           return; // dừng lại, không tạo project
         }
@@ -147,14 +149,14 @@ export default function NewProject() {
       // ② TẠO PROJECT (không rút tiền ở bước này)
       await api.post("/projects", payload);
 
-      alert("Đăng dự án thành công!");
+      alert(t("NewProject.PostSuccess"));
       navigate("/projects");
     } catch (e) {
       console.error("Create project failed", e?.response?.data || e);
       alert(
         e?.response?.data?.detail ||
           e?.response?.data?.message ||
-          "Có lỗi khi đăng dự án"
+          t("NewProject.PostFailed")
       );
     } finally {
       setSubmitting(false);
@@ -163,7 +165,7 @@ export default function NewProject() {
 
   return (
     <div className="container-ld py-10">
-      <h1 className="text-3xl font-semibold text-center">Đăng dự án mới</h1>
+      <h1 className="text-3xl font-semibold text-center">{t("NewProject.Title")}</h1>
 
       {err && (
         <div className="mt-6 text-sm text-red-700 bg-red-50 border border-red-200 p-3 rounded">
@@ -174,24 +176,24 @@ export default function NewProject() {
       <div className="mt-8 space-y-6">
         {/* Thông tin dự án */}
         <div className="card">
-          <div className="card-header p-5 font-semibold">Thông tin dự án</div>
+          <div className="card-header p-5 font-semibold">{t("NewProject.ProjectInfo")}</div>
           <div className="card-body grid md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm">Tiêu đề dự án *</label>
+              <label className="text-sm">{t("NewProject.ProjectTitleLabel")}</label>
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="VD: Thiết kế logo cho công ty công nghệ"
+                placeholder={t("NewProject.TitlePlaceholder")}
               />
             </div>
 
             <div>
-              <label className="text-sm">Danh mục *</label>
+              <label className="text-sm">{t("NewProject.CategoryLabel")}</label>
               <Select
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
               >
-                <option value="">--Chọn danh mục--</option>
+                <option value="">{t("NewProject.SelectCategory")}</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -201,11 +203,11 @@ export default function NewProject() {
             </div>
 
             <div className="md:col-span-2">
-              <label className="text-sm">Mô tả dự án *</label>
+              <label className="text-sm">{t("NewProject.DescriptionLabel")}</label>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Mô tả chi tiết yêu cầu, mục tiêu và kỳ vọng..."
+                placeholder={t("NewProject.DescriptionPlaceholder")}
               />
             </div>
           </div>
@@ -213,10 +215,10 @@ export default function NewProject() {
 
         {/* Ngân sách */}
         <div className="card">
-          <div className="card-header p-5 font-semibold">Ngân sách</div>
+          <div className="card-header p-5 font-semibold">{t("NewProject.Budget")}</div>
           <div className="card-body grid md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm">Loại ngân sách *</label>
+              <label className="text-sm">{t("NewProject.BudgetType")}</label>
               <div className="mt-2 flex gap-6 text-sm">
                 <label className="flex items-center gap-2">
                   <input
@@ -226,7 +228,7 @@ export default function NewProject() {
                     checked={budgetType === "Fixed"}
                     onChange={(e) => setBudgetType(e.target.value)}
                   />
-                  Giá cố định
+                  {t("NewProject.FixedPrice")}
                 </label>
                 <label className="flex items-center gap-2">
                   <input
@@ -236,13 +238,13 @@ export default function NewProject() {
                     checked={budgetType === "Hourly"}
                     onChange={(e) => setBudgetType(e.target.value)}
                   />
-                  Theo giờ
+                  {t("NewProject.HourlyRate")}
                 </label>
               </div>
             </div>
 
             <div>
-              <label className="text-sm">Tổng ngân sách (VND) *</label>
+              <label className="text-sm">{t("NewProject.TotalBudget")}</label>
               <Input
                 type="number"
                 value={budgetAmount}
@@ -255,10 +257,10 @@ export default function NewProject() {
 
         {/* Thời gian */}
         <div className="card">
-          <div className="card-header p-5 font-semibold">Thời gian</div>
+          <div className="card-header p-5 font-semibold">{t("NewProject.Time")}</div>
           <div className="card-body grid md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm">Thời gian hoàn thành *</label>
+              <label className="text-sm">{t("NewProject.Deadline")}</label>
               <Input
                 type="date"
                 value={deadline}
@@ -270,7 +272,7 @@ export default function NewProject() {
 
         {/* Kỹ năng */}
         <div className="card">
-          <div className="card-header p-5 font-semibold">Kỹ năng cần thiết</div>
+          <div className="card-header p-5 font-semibold">{t("NewProject.RequiredSkills")}</div>
           <div className="card-body grid md:grid-cols-3 gap-3 text-sm">
             {skillOptions.map((s) => (
               <label key={s.id} className="flex items-center gap-2">
@@ -287,7 +289,7 @@ export default function NewProject() {
 
         {/* Hình ảnh dự án */}
         <div className="card">
-          <div className="card-header p-5 font-semibold">Hình ảnh dự án</div>
+          <div className="card-header p-5 font-semibold">{t("NewProject.ProjectImages")}</div>
           <div className="card-body">
             <ImageUpload
               multiple={true}
@@ -327,10 +329,10 @@ export default function NewProject() {
             onClick={() => navigate("/projects")}
             disabled={submitting}
           >
-            Hủy bỏ
+            {t("NewProject.Cancel")}
           </Button>
           <Button onClick={handleSubmit} disabled={submitting}>
-            {submitting ? "Đang đăng..." : "Đăng dự án"}
+            {submitting ? t("NewProject.Posting") : t("NewProject.PostProject")}
           </Button>
         </div>
       </div>

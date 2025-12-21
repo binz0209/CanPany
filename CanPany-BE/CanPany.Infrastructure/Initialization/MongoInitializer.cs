@@ -250,7 +250,22 @@ public class MongoInitializer : IMongoInitializer
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Failed to migrate user {UserId}", userDoc["_id"]?.AsString ?? "unknown");
+                    string userIdStr = "unknown";
+                    try
+                    {
+                        var idValue = userDoc["_id"];
+                        if (idValue != null && !idValue.IsBsonNull)
+                        {
+                            if (idValue.IsObjectId)
+                                userIdStr = idValue.AsObjectId.ToString();
+                            else if (idValue.IsString)
+                                userIdStr = idValue.AsString;
+                            else
+                                userIdStr = idValue.ToString() ?? "unknown";
+                        }
+                    }
+                    catch { }
+                    _logger.LogWarning(ex, "Failed to migrate user {UserId}", userIdStr);
                 }
             }
 

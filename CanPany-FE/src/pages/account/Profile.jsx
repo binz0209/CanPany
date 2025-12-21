@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useOutletContext, useParams } from "react-router-dom";
-import api from "../../lib/api";
+import apiService from "../../lib/api.service";
 import { jwtDecode } from "jwt-decode";
+import { useI18n } from "../../hooks/useI18n";
 
 export default function Profile() {
+  const { t } = useI18n();
   const [profile, setProfile] = useState(null);
   const [skills, setSkills] = useState([]);
   const [allSkills, setAllSkills] = useState([]);
@@ -37,34 +39,34 @@ export default function Profile() {
     if (!targetUserId) return;
 
     // Lấy thông tin User để có avatarUrl
-    api
-      .get(`/api/users/${targetUserId}`)
-      .then((res) => {
-        setUser(res.data);
-        setAvatarUrl(res.data?.avatarUrl || "");
+    apiService
+      .get(`/users/${targetUserId}`)
+      .then((data) => {
+        setUser(data);
+        setAvatarUrl(data?.avatarUrl || "");
       })
       .catch((err) => console.error("Get user error:", err));
 
-    api
-      .get(`/api/userprofiles/by-user/${targetUserId}`)
-      .then(async (res) => {
+    apiService
+      .get(`/userprofiles/by-user/${targetUserId}`)
+      .then(async (data) => {
         // Nếu hồ sơ bị ẩn công khai và người xem KHÔNG phải chủ sở hữu → hiển thị thông báo ẩn
-        if (res.data && res.data.hidden) {
-          setProfile({ hidden: true, message: res.data.message });
+        if (data && data.hidden) {
+          setProfile({ hidden: true, message: data.message });
           setIsOwner(false);
           return;
         }
 
-        setProfile(res.data);
-        setIsOwner(!viewedUserId && res.data.userId === currentUserId);
+        setProfile(data);
+        setIsOwner(!viewedUserId && data.userId === currentUserId);
 
-        if (res.data.skillIds?.length > 0) {
-          const sres = await api.post("/skills/resolve", res.data.skillIds);
-          setSkills(sres.data);
+        if (data.skillIds?.length > 0) {
+          const skillsData = await apiService.post("/skills/resolve", data.skillIds);
+          setSkills(skillsData);
         }
       })
       .catch((err) => {
-        console.error("Get profile error:", err.response?.data || err.message);
+        console.error("Get profile error:", err?.message || err?.response?.data || err);
       });
   }, [viewedUserId]);
 
@@ -81,7 +83,7 @@ export default function Profile() {
     if (profile.hidden) {
       return (
         <div className="card p-6 text-center text-sm text-gray-600">
-          {profile.message || "Người dùng đã ẩn hồ sơ công khai"}
+          {profile.message || t("Profile.HiddenProfile")}
         </div>
       );
     }
@@ -112,18 +114,18 @@ export default function Profile() {
 
   const handleSave = async () => {
     try {
-      await api.put(`/userprofiles/${profile.id}`, profile);
+      await apiService.put(`/userprofiles/${profile.id}`, profile);
       // Cập nhật avatar nếu có
       if (avatarUrl && user) {
-        await api.put(`/users/${user.id}`, { ...user, avatarUrl });
+        await apiService.put(`/users/${user.id}`, { ...user, avatarUrl });
       }
-      alert("Cập nhật thành công!");
+      alert(t("Profile.UpdateSuccess"));
       setIsEditingProfile(false);
       // Reload để hiển thị avatar mới
       window.location.reload();
     } catch (err) {
       console.error("Update error:", err);
-      alert("Cập nhật thất bại!");
+      alert(t("Profile.UpdateFailed"));
     }
   };
 
@@ -136,15 +138,15 @@ export default function Profile() {
         skillIds: [...(profile.skillIds || []), selectedSkill],
       };
 
-      await api.put(`/userprofiles/${profile.id}`, updated);
+      await apiService.put(`/userprofiles/${profile.id}`, updated);
 
-      const sres = await api.post("/skills/resolve", updated.skillIds);
-      setSkills(sres.data);
+      const skillsData = await apiService.post("/skills/resolve", updated.skillIds);
+      setSkills(skillsData);
       setProfile(updated);
       setSelectedSkill("");
     } catch (err) {
       console.error("Add skill error:", err);
-      alert("Thêm kỹ năng thất bại!");
+      alert(t("Profile.AddSkillFailed"));
     }
   };
 
@@ -155,14 +157,14 @@ export default function Profile() {
         skillIds: profile.skillIds.filter((id) => id !== skillId),
       };
 
-      await api.put(`/userprofiles/${profile.id}`, updated);
+      await apiService.put(`/userprofiles/${profile.id}`, updated);
 
-      const sres = await api.post("/skills/resolve", updated.skillIds);
-      setSkills(sres.data);
+      const skillsData = await apiService.post("/skills/resolve", updated.skillIds);
+      setSkills(skillsData);
       setProfile(updated);
     } catch (err) {
       console.error("Remove skill error:", err);
-      alert("Xóa kỹ năng thất bại!");
+      alert(t("Profile.RemoveSkillFailed"));
     }
   };
 
@@ -184,7 +186,7 @@ export default function Profile() {
                   value={profile.title || ""}
                   onChange={handleChange}
                   className="input"
-                  placeholder="Chức danh"
+                  placeholder={t("Profile.JobTitle")}
                 />
                 <input
                   type="text"
@@ -192,7 +194,7 @@ export default function Profile() {
                   value={profile.location || ""}
                   onChange={handleChange}
                   className="input"
-                  placeholder="Nơi ở"
+                  placeholder={t("Profile.Location")}
                 />
                 <input
                   type="number"
@@ -200,15 +202,15 @@ export default function Profile() {
                   value={profile.hourlyRate || ""}
                   onChange={handleChange}
                   className="input"
-                  placeholder="Rate theo giờ"
+                  placeholder={t("Profile.HourlyRate")}
                 />
               </>
             ) : (
               <>
                 <div>
-                  Chức danh: <b>{profile.title}</b>
+                  {t("Profile.JobTitle")}: <b>{profile.title}</b>
                 </div>
-                <div>Nơi ở: {profile.location ?? "Chưa cập nhật"}</div>
+                <div>{t("Profile.Location")}: {profile.location ?? t("Profile.NotUpdated")}</div>
                 <div>Rate: {profile.hourlyRate ?? "-"} VND/h</div>
               </>
             )}
@@ -217,7 +219,7 @@ export default function Profile() {
 
         {/* Ngôn ngữ */}
         <div className="card p-5">
-          <div className="font-semibold mb-3">Ngôn ngữ</div>
+          <div className="font-semibold mb-3">{t("Profile.Languages")}</div>
           {isEditing ? (
             <div className="flex flex-col gap-2">
               {profile.languages?.map((lang, i) => (
@@ -229,7 +231,7 @@ export default function Profile() {
                       handleArrayChange("languages", e.target.value, i)
                     }
                     className="input flex-1"
-                    placeholder="Ngôn ngữ"
+                    placeholder={t("Profile.Languages")}
                   />
                   <button
                     className="btn btn-xs btn-error"
@@ -243,7 +245,7 @@ export default function Profile() {
                 className="btn btn-xs btn-outline"
                 onClick={() => handleAddItem("languages")}
               >
-                + Thêm ngôn ngữ
+                + {t("Profile.AddLanguage")}
               </button>
             </div>
           ) : (
@@ -259,7 +261,7 @@ export default function Profile() {
 
         {/* Chứng chỉ */}
         <div className="card p-5">
-          <div className="font-semibold mb-3">Chứng chỉ</div>
+          <div className="font-semibold mb-3">{t("Profile.Certificates")}</div>
           {isEditing ? (
             <div className="flex flex-col gap-2">
               {profile.certifications?.map((c, i) => (
@@ -271,7 +273,7 @@ export default function Profile() {
                       handleArrayChange("certifications", e.target.value, i)
                     }
                     className="input flex-1"
-                    placeholder="Chứng chỉ"
+                    placeholder={t("Profile.Certificates")}
                   />
                   <button
                     className="btn btn-xs btn-error"
@@ -285,7 +287,7 @@ export default function Profile() {
                 className="btn btn-xs btn-outline"
                 onClick={() => handleAddItem("certifications")}
               >
-                + Thêm chứng chỉ
+                + {t("Profile.AddCertificate")}
               </button>
             </div>
           ) : (
@@ -301,14 +303,14 @@ export default function Profile() {
       {/* Giới thiệu & kỹ năng */}
       <div className="lg:col-span-2 space-y-6">
         <div className="card p-5">
-          <div className="font-semibold mb-3">Giới thiệu</div>
+          <div className="font-semibold mb-3">{t("Profile.Bio")}</div>
           {isEditing ? (
             <textarea
               name="bio"
               value={profile.bio || ""}
               onChange={handleChange}
               className="textarea w-full"
-              placeholder="Giới thiệu"
+              placeholder={t("Profile.BioPlaceholder")}
             />
           ) : (
             <p className="text-sm text-slate-700">{profile.bio}</p>
@@ -317,7 +319,7 @@ export default function Profile() {
 
         <div className="card p-5">
           <div className="flex items-center justify-between">
-            <div className="font-semibold">Kỹ năng chuyên môn</div>
+            <div className="font-semibold">{t("Projects.SkillsLabel")}</div>
             {isEditing && (
               <div className="flex gap-2">
                 <select
@@ -361,7 +363,7 @@ export default function Profile() {
       {isEditing && (
         <div className="lg:col-span-3 text-right">
           <button className="btn btn-primary" onClick={handleSave}>
-            Lưu thay đổi
+            {t("Projects.SaveChanges")}
           </button>
         </div>
       )}

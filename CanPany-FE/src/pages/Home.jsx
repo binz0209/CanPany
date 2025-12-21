@@ -4,6 +4,7 @@ import api from '../lib/api'
 import { useNavigate, Link } from "react-router-dom";
 import BannerCarousel from '../components/BannerCarousel';
 import { jwtDecode } from 'jwt-decode';
+import { useI18n } from '../hooks/useI18n';
 
 export default function Home() {
   const [categories, setCategories] = useState([]);
@@ -11,6 +12,7 @@ export default function Home() {
   const [recommendedProjects, setRecommendedProjects] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   useEffect(() => {
     api.get("/categories")
@@ -57,14 +59,14 @@ export default function Home() {
         <div className="container-ld py-16">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-              Kết nối <span className="text-brand-700">Freelancer</span> & <span className="text-accent">Khách hàng</span>
+              {t("Home.HeroTitle")} <span className="text-brand-700">{t("Home.Candidate")}</span> & <span className="text-accent">{t("Home.Company")}</span>
             </h1>
             <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
-              Tìm kiếm freelancer năng lực hoặc dự án phù hợp. Xây dựng sự nghiệp tự do với LanServe.
+              {t("Home.HeroSubtitle")}
             </p>
             <div className="mt-6 flex gap-3 justify-center">
-              <Button>Tìm Freelancer</Button>
-              <Button variant="outline" as={Link} to="/post-project">Đăng Dự Án</Button>
+              <Button>{t("Home.FindFreelancer")}</Button>
+              <Button variant="outline" as={Link} to="/post-project">{t("Home.PostProject")}</Button>
             </div>
           </div>
         </div>
@@ -72,7 +74,7 @@ export default function Home() {
 
       {/* Categories */}
       <section className="container-ld py-12">
-        <h2 className="text-2xl font-semibold">Danh mục dịch vụ</h2>
+        <h2 className="text-2xl font-semibold">{t("Home.ServiceCategories")}</h2>
         <div className="mt-6 grid md:grid-cols-3 lg:grid-cols-4 gap-5">
           {categories.map((c, i) => (
             <div key={c.id || c._id || `cat-${i}`} className="card p-5">
@@ -88,9 +90,9 @@ export default function Home() {
         <section className="bg-gradient-to-br from-blue-50 to-purple-50 border-y">
           <div className="container-ld py-12">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold">Dự án phù hợp với bạn</h2>
+              <h2 className="text-2xl font-semibold">{t("Home.SuitableProjects")}</h2>
               <Link to="/account/projects" className="text-brand-700 hover:underline text-sm">
-                Xem tất cả →
+                {t("Home.ViewAll")}
               </Link>
             </div>
             <div className="mt-6 grid md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -100,7 +102,7 @@ export default function Home() {
                     <h3 className="font-semibold text-lg flex-1">{project.title}</h3>
                     {project.similarity !== undefined && (
                       <span className="ml-2 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                        {project.similarity}% phù hợp
+                        {project.similarity}{t("Home.MatchPercentage")}
                       </span>
                     )}
                   </div>
@@ -117,7 +119,7 @@ export default function Home() {
                       as={Link}
                       to={`/account/projects?view=${project.id}`}
                     >
-                      Xem chi tiết
+                      {t("Home.ViewDetails")}
                     </Button>
                   </div>
                 </div>
@@ -130,7 +132,7 @@ export default function Home() {
       {/* Freelancers */}
       <section className="bg-white border-y">
         <div className="container-ld py-12">
-          <h2 className="text-2xl font-semibold">Freelancer nổi bật</h2>
+          <h2 className="text-2xl font-semibold">{t("Home.FeaturedFreelancers")}</h2>
           <div className="mt-6 grid md:grid-cols-3 gap-5">
             {freelancers.slice(0, 3).map((f, i) => (
               <div key={f.id || `user-${i}`} className="card p-5">
@@ -141,7 +143,7 @@ export default function Home() {
                     <div className="text-sm text-slate-500">{f.email}</div>
                   </div>
                 </div>
-                <Button className="mt-4 w-full" variant="outline">Xem hồ sơ</Button>
+                <Button className="mt-4 w-full" variant="outline">{t("Home.ViewProfile")}</Button>
               </div>
             ))}
           </div>
@@ -151,10 +153,10 @@ export default function Home() {
       {/* CTA */}
       <section className="bg-gradient-to-r from-blue-500 to-orange-500 text-white">
         <div className="container-ld py-14 text-center">
-          <h2 className="text-3xl font-semibold">Sẵn sàng bắt đầu dự án của bạn?</h2>
+          <h2 className="text-3xl font-semibold">{t("Home.ReadyToStart")}</h2>
           <div className="mt-6 flex gap-3 justify-center">
-            <Button className="bg-white text-slate-900">Đăng ký miễn phí</Button>
-            <Button variant="outline" className="border-white text-black">Tìm hiểu thêm</Button>
+            <Button className="bg-white text-slate-900">{t("Home.SignUpFree")}</Button>
+            <Button variant="outline" className="border-white text-black">{t("Home.LearnMore")}</Button>
           </div>
         </div>
       </section>

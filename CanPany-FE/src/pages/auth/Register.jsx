@@ -2,7 +2,7 @@ import { useState } from "react";
 import Input from "../../components/ui/input";
 import Button from "../../components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../../lib/api";
+import apiService from "../../lib/api.service";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "sonner";
 import { GoogleLogin } from "@react-oauth/google";
@@ -10,7 +10,7 @@ import { GoogleLogin } from "@react-oauth/google";
 
 export default function Register() {
   const nav = useNavigate();
-  const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
+  const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "", role: "Candidate" });
   const [err, setErr] = useState("");
 
   const onSubmit = async (e) => {
@@ -21,18 +21,21 @@ export default function Register() {
     if (form.password !== form.confirm)
       return setErr("Mật khẩu xác nhận không khớp.");
     try {
-      const res = await api.post("/auth/register", {
+      const response = await apiService.post("/auth/register", {
         fullName: form.name,
         email: form.email,
         password: form.password,
-        role: "User",
+        role: form.role === "Candidate" ? "Candidate" : "Company",
       });
       
-      const token = res.data?.accessToken || res.data?.token;
-      if (!token) throw new Error("Không nhận được token từ server");
+      // apiService đã extract data từ ApiResponse, response là { accessToken, expiresIn }
+      const token = response?.accessToken || response?.token;
+      if (!token) {
+        console.error("Register response:", response);
+        throw new Error("Không nhận được token từ server");
+      }
 
       localStorage.setItem("token", token);
-      api.defaults.headers.common.Authorization = `Bearer ${token}`;
 
       // Decode JWT để lấy thông tin user
       const decoded = jwtDecode(token);
@@ -66,20 +69,23 @@ export default function Register() {
       nav("/account/profile");
     } catch (err) {
       console.error("Register failed:", err);
-      setErr(err.response?.data?.message || "Đăng ký thất bại.");
+      setErr(err?.message || err?.response?.data?.message || "Đăng ký thất bại.");
     }
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       const idToken = credentialResponse.credential;
-      const res = await api.post("/auth/google", { idToken });
+      const response = await apiService.post("/auth/google", { idToken });
       
-      const token = res.data?.accessToken;
-      if (!token) throw new Error("Google login failed: No token");
+      // apiService đã extract data từ ApiResponse, response là { accessToken, expiresIn }
+      const token = response?.accessToken || response?.token;
+      if (!token) {
+        console.error("Google login response:", response);
+        throw new Error("Google login failed: No token");
+      }
 
       localStorage.setItem("token", token);
-      api.defaults.headers.common.Authorization = `Bearer ${token}`;
 
       // Decode JWT để lấy thông tin user
       const decoded = jwtDecode(token);
@@ -112,7 +118,7 @@ export default function Register() {
       nav("/account/profile");
     } catch (err) {
       console.error("Google login failed:", err);
-      toast.error(err.response?.data?.message || "Đăng nhập Google thất bại.");
+      toast.error(err?.message || err?.response?.data?.message || "Đăng nhập Google thất bại.");
     }
   };
 
@@ -162,6 +168,17 @@ export default function Register() {
               value={form.confirm}
               onChange={(e) => setForm({ ...form, confirm: e.target.value })}
             />
+          </div>
+          <div>
+            <label className="text-sm">Bạn là</label>
+            <select
+              className="input w-full"
+              value={form.role}
+              onChange={(e) => setForm({ ...form, role: e.target.value })}
+            >
+              <option value="Candidate">Ứng viên (Candidate)</option>
+              <option value="Company">Công ty (Company)</option>
+            </select>
           </div>
           <Button type="submit" className="w-full">Tạo tài khoản</Button>
           <div className="text-center text-slate-500">Hoặc</div>

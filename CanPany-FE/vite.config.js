@@ -26,6 +26,8 @@ export default defineConfig({
   base: "/", // Đảm bảo base URL đúng cho production
   server: {
     port: 5174,
+    host: true,
+    strictPort: true, // Nếu port 5174 bị chiếm sẽ báo lỗi thay vì tự động chọn port khác
     proxy: {
       "/api": {
         target: "http://localhost:5070",

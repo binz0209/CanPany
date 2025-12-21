@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  
+  <!-- Common Error Messages -->
+  <data name="Error.Common.NotFound" xml:space="preserve">
+    <value>Không tìm thấy tài nguyên</value>
+  </data>
+  <data name="Error.Common.Unauthorized" xml:space="preserve">
+    <value>Bạn không có quyền thực hiện hành động này</value>
+  </data>
+  <data name="Error.Common.InternalServerError" xml:space="preserve">
+    <value>Đã xảy ra lỗi không mong muốn. Vui lòng thử lại sau.</value>
+  </data>
+  <data name="Error.Common.BadRequest" xml:space="preserve">
+    <value>Yêu cầu không hợp lệ</value>
+  </data>
+  <data name="Error.Common.ValidationFailed" xml:space="preserve">
+    <value>Xác thực thất bại</value>
+  </data>
+
+  <!-- User Error Messages -->
+  <data name="Error.User.Register.EmailExists" xml:space="preserve">
+    <value>Email '{0}' đã tồn tại</value>
+  </data>
+  <data name="Error.User.Register.Failed" xml:space="preserve">
+    <value>Đăng ký người dùng thất bại: {0}</value>
+  </data>
+  <data name="Error.User.Login.InvalidCredentials" xml:space="preserve">
+    <value>Email hoặc mật khẩu không đúng</value>
+  </data>
+  <data name="Error.User.Login.Failed" xml:space="preserve">
+    <value>Đăng nhập thất bại: {0}</value>
+  </data>
+  <data name="Error.User.NotFound" xml:space="preserve">
+    <value>Không tìm thấy người dùng với ID '{0}'</value>
+  </data>
+  <data name="Error.User.Update.Failed" xml:space="preserve">
+    <value>Cập nhật người dùng thất bại</value>
+  </data>
+  <data name="Error.User.Delete.Failed" xml:space="preserve">
+    <value>Xóa người dùng thất bại</value>
+  </data>
+  <data name="Error.User.PasswordChange.Failed" xml:space="preserve">
+    <value>Đổi mật khẩu thất bại: {0}</value>
+  </data>
+  <data name="Error.User.PasswordChange.OldPasswordIncorrect" xml:space="preserve">
+    <value>Mật khẩu cũ không đúng</value>
+  </data>
+  <data name="Error.User.PasswordReset.EmailNotFound" xml:space="preserve">
+    <value>Email không tồn tại trong hệ thống</value>
+  </data>
+  <data name="Error.User.PasswordReset.CodeExpired" xml:space="preserve">
+    <value>Mã xác thực đã hết hạn</value>
+  </data>
+  <data name="Error.User.PasswordReset.CodeInvalid" xml:space="preserve">
+    <value>Mã xác thực không đúng</value>
+  </data>
+  <data name="Error.User.PasswordReset.EmailSendFailed" xml:space="preserve">
+    <value>Không thể gửi email</value>
+  </data>
+
+  <!-- User Validation Messages -->
+  <data name="Validation.User.FullNameRequired" xml:space="preserve">
+    <value>Họ tên là bắt buộc</value>
+  </data>
+  <data name="Validation.User.EmailRequired" xml:space="preserve">
+    <value>Email là bắt buộc</value>
+  </data>
+  <data name="Validation.User.EmailInvalid" xml:space="preserve">
+    <value>Định dạng email không hợp lệ</value>
+  </data>
+  <data name="Validation.User.PasswordRequired" xml:space="preserve">
+    <value>Mật khẩu là bắt buộc</value>
+  </data>
+  <data name="Validation.User.PasswordMinLength" xml:space="preserve">
+    <value>Mật khẩu phải có ít nhất {0} ký tự</value>
+  </data>
+  <data name="Validation.User.UserIdRequired" xml:space="preserve">
+    <value>ID người dùng là bắt buộc</value>
+  </data>
+
+  <!-- User Success Messages -->
+  <data name="Success.User.Register" xml:space="preserve">
+    <value>Đăng ký người dùng thành công</value>
+  </data>
+  <data name="Success.User.Login" xml:space="preserve">
+    <value>Đăng nhập thành công</value>
+  </data>
+  <data name="Success.User.Update" xml:space="preserve">
+    <value>Cập nhật người dùng thành công</value>
+  </data>
+  <data name="Success.User.Delete" xml:space="preserve">
+    <value>Xóa người dùng thành công</value>
+  </data>
+  <data name="Success.User.PasswordChange" xml:space="preserve">
+    <value>Đổi mật khẩu thành công</value>
+  </data>
+  <data name="Success.User.PasswordReset.CodeSent" xml:space="preserve">
+    <value>Mã xác thực đã được gửi về email của bạn</value>
+  </data>
+  <data name="Success.User.PasswordReset.Reset" xml:space="preserve">
+    <value>Mật khẩu đã được đặt lại thành công</value>
+  </data>
+
+  <!-- User Logging Messages -->
+  <data name="Logging.User.Register.Start" xml:space="preserve">
+    <value>Bắt đầu đăng ký người dùng với email: {0}</value>
+  </data>
+  <data name="Logging.User.Register.Complete" xml:space="preserve">
+    <value>Hoàn thành đăng ký người dùng với email: {0}, ID người dùng: {1}</value>
+  </data>
+  <data name="Logging.User.Login.Start" xml:space="preserve">
+    <value>Bắt đầu đăng nhập với email: {0}</value>
+  </data>
+  <data name="Logging.User.Login.Complete" xml:space="preserve">
+    <value>Đăng nhập thành công với email: {0}, ID người dùng: {1}</value>
+  </data>
+  <data name="Logging.User.Update.Start" xml:space="preserve">
+    <value>Bắt đầu cập nhật người dùng với ID: {0}</value>
+  </data>
+  <data name="Logging.User.Update.Complete" xml:space="preserve">
+    <value>Hoàn thành cập nhật người dùng với ID: {0}</value>
+  </data>
+  <data name="Logging.User.Delete.Start" xml:space="preserve">
+    <value>Bắt đầu xóa người dùng với ID: {0}</value>
+  </data>
+  <data name="Logging.User.Delete.Complete" xml:space="preserve">
+    <value>Hoàn thành xóa người dùng với ID: {0}</value>
+  </data>
+  <data name="Logging.User.PasswordChange.Start" xml:space="preserve">
+    <value>Bắt đầu đổi mật khẩu cho người dùng với ID: {0}</value>
+  </data>
+  <data name="Logging.User.PasswordChange.Complete" xml:space="preserve">
+    <value>Hoàn thành đổi mật khẩu cho người dùng với ID: {0}</value>
+  </data>
+  <data name="Logging.User.PasswordReset.Request" xml:space="preserve">
+    <value>Yêu cầu đặt lại mật khẩu cho email: {0}</value>
+  </data>
+  <data name="Logging.User.PasswordReset.Complete" xml:space="preserve">
+    <value>Hoàn thành đặt lại mật khẩu cho email: {0}</value>
+  </data>
+
+  <!-- Project Error Messages -->
+  <data name="Error.Project.NotFound" xml:space="preserve">
+    <value>Không tìm thấy dự án với ID '{0}'</value>
+  </data>
+  <data name="Error.Project.Create.Failed" xml:space="preserve">
+    <value>Tạo dự án thất bại: {0}</value>
+  </data>
+  <data name="Error.Project.Update.Failed" xml:space="preserve">
+    <value>Cập nhật dự án thất bại: {0}</value>
+  </data>
+  <data name="Error.Project.Delete.Failed" xml:space="preserve">
+    <value>Xóa dự án thất bại: {0}</value>
+  </data>
+  <data name="Error.Project.Unauthorized" xml:space="preserve">
+    <value>Bạn không có quyền chỉnh sửa dự án này</value>
+  </data>
+
+  <!-- Project Validation Messages -->
+  <data name="Validation.Project.TitleRequired" xml:space="preserve">
+    <value>Tiêu đề dự án là bắt buộc</value>
+  </data>
+  <data name="Validation.Project.DescriptionRequired" xml:space="preserve">
+    <value>Mô tả dự án là bắt buộc</value>
+  </data>
+  <data name="Validation.Project.OwnerIdRequired" xml:space="preserve">
+    <value>ID chủ sở hữu dự án là bắt buộc</value>
+  </data>
+  <data name="Validation.Project.ProjectIdRequired" xml:space="preserve">
+    <value>ID dự án là bắt buộc</value>
+  </data>
+
+  <!-- Project Success Messages -->
+  <data name="Success.Project.Create" xml:space="preserve">
+    <value>Tạo dự án thành công</value>
+  </data>
+  <data name="Success.Project.Update" xml:space="preserve">
+    <value>Cập nhật dự án thành công</value>
+  </data>
+  <data name="Success.Project.Delete" xml:space="preserve">
+    <value>Xóa dự án thành công</value>
+  </data>
+
+  <!-- Project Logging Messages -->
+  <data name="Logging.Project.Create.Start" xml:space="preserve">
+    <value>Bắt đầu tạo dự án, Tiêu đề: {0}, ID chủ sở hữu: {1}</value>
+  </data>
+  <data name="Logging.Project.Create.Complete" xml:space="preserve">
+    <value>Hoàn thành tạo dự án, ID dự án: {0}, Tiêu đề: {1}</value>
+  </data>
+  <data name="Logging.Project.Update.Start" xml:space="preserve">
+    <value>Bắt đầu cập nhật dự án với ID: {0}</value>
+  </data>
+  <data name="Logging.Project.Update.Complete" xml:space="preserve">
+    <value>Hoàn thành cập nhật dự án với ID: {0}</value>
+  </data>
+  <data name="Logging.Project.Delete.Start" xml:space="preserve">
+    <value>Bắt đầu xóa dự án với ID: {0}</value>
+  </data>
+  <data name="Logging.Project.Delete.Complete" xml:space="preserve">
+    <value>Hoàn thành xóa dự án với ID: {0}</value>
+  </data>
+
+  <!-- Background Job Messages -->
+  <data name="Error.BackgroundJob.ProcessFailed" xml:space="preserve">
+    <value>Xử lý background job thất bại: {0}</value>
+  </data>
+  <data name="Error.BackgroundJob.HandlerNotFound" xml:space="preserve">
+    <value>Không tìm thấy handler cho loại job: {0}</value>
+  </data>
+  <data name="Logging.BackgroundJob.ProcessStart" xml:space="preserve">
+    <value>Đang xử lý background job, ID job: {0}, Loại job: {1}</value>
+  </data>
+  <data name="Logging.BackgroundJob.ProcessComplete" xml:space="preserve">
+    <value>Hoàn thành xử lý background job, ID job: {0}</value>
+  </data>
+  <data name="Logging.BackgroundJob.ProcessFailed" xml:space="preserve">
+    <value>Xử lý background job thất bại, ID job: {0}, Lỗi: {1}</value>
+  </data>
+
+  <!-- Status Messages -->
+  <data name="Status.Processing" xml:space="preserve">
+    <value>Đang xử lý...</value>
+  </data>
+  <data name="Status.Completed" xml:space="preserve">
+    <value>Hoàn thành</value>
+  </data>
+  <data name="Status.Failed" xml:space="preserve">
+    <value>Thất bại</value>
+  </data>
+  <data name="Status.Pending" xml:space="preserve">
+    <value>Đang chờ</value>
+  </data>
+</root>
+
+
+
+

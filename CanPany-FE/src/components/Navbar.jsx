@@ -6,9 +6,12 @@ import { useEffect, useState } from "react";
 import { useWalletStore } from "../stores/walletStore";
 import NotificationBell from "./NotificationBell";
 import { useNotificationStore } from "../stores/notificationStore";
+import LanguageSwitcher from "./LanguageSwitcher";
+import { useI18n } from "../hooks/useI18n";
 
 export default function Navbar() {
   const nav = useNavigate();
+  const { t } = useI18n();
   const [showAccountMenu, setShowAccountMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const token =
@@ -74,7 +77,7 @@ export default function Navbar() {
       <button
         onClick={goWallet}
         className="px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-2 text-sm font-medium hover:bg-emerald-100 transition-colors"
-        title="Xem ví"
+        title={t("Navbar.ViewWallet")}
       >
         <Wallet className="w-4 h-4" />
         <span className="hidden sm:inline">{text}</span>
@@ -93,23 +96,24 @@ export default function Navbar() {
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex gap-1 flex-1 justify-center max-w-2xl">
           <NavLink to="/" className={linkClass}>
-            Trang chủ
+            {t("Navbar.Home")}
           </NavLink>
           <NavLink to="/projects" className={linkClass}>
-            Dự án
+            {t("Navbar.Projects")}
           </NavLink>
           <NavLink to="/post-project" className={linkClass}>
-            Đăng dự án
+            {t("Navbar.PostProject")}
           </NavLink>
           <NavLink to="/users" className={linkClass}>
-            Người dùng
+            {t("Navbar.Users")}
           </NavLink>
           <NavLink to="/how-it-works" className={linkClass}>
-            Cách hoạt động
+            {t("Navbar.HowItWorks")}
           </NavLink>
         </nav>
 
         <div className="flex items-center gap-2 flex-shrink-0">
+          <LanguageSwitcher />
           {token ? (
             <>
               {renderBalance()}
@@ -117,7 +121,7 @@ export default function Navbar() {
               <NavLink 
                 to="/account/messages" 
                 className={iconButtonClass}
-                title="Tin nhắn"
+                title={t("Navbar.Messages")}
               >
                 <MessageSquare className="w-5 h-5" />
               </NavLink>
@@ -128,7 +132,7 @@ export default function Navbar() {
                 <NavLink 
                   to="/admin" 
                   className={iconButtonClass}
-                  title="Quản trị"
+                  title={t("Navbar.Admin")}
                 >
                   <Shield className="w-5 h-5" />
                 </NavLink>
@@ -139,7 +143,7 @@ export default function Navbar() {
                 <button
                   onClick={() => setShowAccountMenu(!showAccountMenu)}
                   className={iconButtonClass}
-                  title="Tài khoản"
+                  title={t("Navbar.Account")}
                 >
                   <User className="w-5 h-5" />
                 </button>
@@ -157,7 +161,7 @@ export default function Navbar() {
                         onClick={() => setShowAccountMenu(false)}
                       >
                         <User className="w-4 h-4" />
-                        Hồ sơ
+                        {t("Navbar.Profile")}
                       </NavLink>
                       <NavLink
                         to="/account/settings"
@@ -165,7 +169,7 @@ export default function Navbar() {
                         onClick={() => setShowAccountMenu(false)}
                       >
                         <Settings className="w-4 h-4" />
-                        Cài đặt
+                        {t("Navbar.Settings")}
                       </NavLink>
                       <hr className="my-1 border-slate-200" />
                       <button
@@ -176,7 +180,7 @@ export default function Navbar() {
                         className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                       >
                         <LogOut className="w-4 h-4" />
-                        Đăng xuất
+                        {t("Navbar.Logout")}
                       </button>
                     </div>
                   </>
@@ -195,10 +199,10 @@ export default function Navbar() {
           ) : (
             <>
               <NavLink to="/login" className={linkClass}>
-                Đăng nhập
+                {t("Navbar.Login")}
               </NavLink>
               <Button variant="primary" as={Link} to="/register" className="text-sm px-3 py-1.5">
-                Đăng ký
+                {t("Navbar.Register")}
               </Button>
             </>
           )}
@@ -214,35 +218,35 @@ export default function Navbar() {
               className={linkClass}
               onClick={() => setShowMobileMenu(false)}
             >
-              Trang chủ
+              {t("Navbar.Home")}
             </NavLink>
             <NavLink 
               to="/projects" 
               className={linkClass}
               onClick={() => setShowMobileMenu(false)}
             >
-              Dự án
+              {t("Navbar.Projects")}
             </NavLink>
             <NavLink 
               to="/post-project" 
               className={linkClass}
               onClick={() => setShowMobileMenu(false)}
             >
-              Đăng dự án
+              {t("Navbar.PostProject")}
             </NavLink>
             <NavLink 
               to="/users" 
               className={linkClass}
               onClick={() => setShowMobileMenu(false)}
             >
-              Người dùng
+              {t("Navbar.Users")}
             </NavLink>
             <NavLink 
               to="/how-it-works" 
               className={linkClass}
               onClick={() => setShowMobileMenu(false)}
             >
-              Cách hoạt động
+              {t("Navbar.HowItWorks")}
             </NavLink>
           </nav>
         </div>

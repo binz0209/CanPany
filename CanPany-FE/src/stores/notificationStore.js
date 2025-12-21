@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import * as signalR from "@microsoft/signalr";
-import { api } from "../lib/api";
+import apiService from "../lib/api.service";
 
 // Detect production: check if not localhost
 const isProduction = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
@@ -42,10 +42,10 @@ export const useNotificationStore = create((set, get) => ({
   // 🧠 Load lại thông báo cũ từ DB
   fetchFromServer: async () => {
     try {
-      const res = await api.get("/notifications/my"); // ✅ chuẩn với BE
-      const data = res.data || [];
+      const data = await apiService.get("/notifications/my"); // ✅ chuẩn với BE
+      const notifications = data || [];
 
-      const parsed = data.map((n) => {
+      const parsed = notifications.map((n) => {
         try {
           if (n.payload && typeof n.payload === "string") {
             n.payloadObj = JSON.parse(n.payload);

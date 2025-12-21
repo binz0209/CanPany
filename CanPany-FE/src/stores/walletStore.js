@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import api from "../lib/api";
+import apiService from "../lib/api.service";
 
 export const useWalletStore = create((set, get) => ({
   balance: 0,
@@ -15,8 +15,8 @@ export const useWalletStore = create((set, get) => ({
     if (!userId) return;
     set({ loading: true, error: null });
     try {
-      const res = await api.get(`/api/wallets/${userId}`);
-      const balance = res.data?.balance ?? 0;
+      const data = await apiService.get(`/wallets/${userId}`);
+      const balance = data?.balance ?? 0;
       set({ balance, loading: false });
     } catch (e) {
       set({ error: e?.message || "Fetch balance failed", loading: false });
@@ -28,12 +28,12 @@ export const useWalletStore = create((set, get) => ({
     if (!userId) return;
     set({ txLoading: true, txError: null });
     try {
-      const res = await api.get(`/api/wallets/history`, {
+      const data = await apiService.get(`/wallets/history`, {
         params: { userId, take, sort },
       });
-      const list = Array.isArray(res.data)
-        ? res.data
-        : res.data?.items || [];
+      const list = Array.isArray(data)
+        ? data
+        : data?.items || [];
       set({ txns: list, txLoading: false });
     } catch (e) {
       set({
@@ -48,12 +48,12 @@ export const useWalletStore = create((set, get) => ({
     if (!userId) return;
     set({ txLoading: true, txError: null });
     try {
-      const res = await api.get(`/api/wallets/topups`, {
+      const data = await apiService.get(`/wallets/topups`, {
         params: { userId, take, sort },
       });
-      const list = Array.isArray(res.data)
-        ? res.data
-        : res.data?.items || [];
+      const list = Array.isArray(data)
+        ? data
+        : data?.items || [];
       set({ txns: list, txLoading: false });
     } catch (e) {
       set({

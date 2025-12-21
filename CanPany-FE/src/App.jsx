@@ -31,6 +31,11 @@ import UserSearch from "./pages/UserSearch";
 import WalletPage from "./pages/wallet/WalletPage";
 import PaymentSuccess from "./pages/payment/PaymentSuccess";
 import PaymentFailed from "./pages/payment/PaymentFailed";
+import ProjectDetail from "./pages/ProjectDetail";
+import Proposals from "./pages/Proposals";
+import ContractDetail from "./pages/ContractDetail";
+import Companies from "./pages/Companies";
+import CVs from "./pages/account/CVs";
 
 import { Toaster } from "sonner";
 import AdminLayout from "./pages/admin/AdminLayout";
@@ -41,6 +46,7 @@ import AdminContracts from "./pages/admin/Contracts";
 import AdminStatistics from "./pages/admin/Statistics";
 import AdminSettings from "./pages/admin/Settings";
 import AdminBanners from "./pages/admin/Banners";
+import AdminAuditLogs from "./pages/admin/AuditLogs";
 
 // ================== AUTH HELPERS ==================
 function PrivateRoute({ children }) {
@@ -111,6 +117,15 @@ function AppContent() {
           <Route path="/" element={<Home />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/projects" element={<Projects />} />
+          <Route path="/projects/:id" element={<ProjectDetail />} />
+          <Route
+            path="/contracts/:id"
+            element={
+              <PrivateRoute>
+                <ContractDetail />
+              </PrivateRoute>
+            }
+          />
           <Route path="/wallet" element={<WalletPage />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/payment-failed" element={<PaymentFailed />} />
@@ -136,8 +151,11 @@ function AppContent() {
             <Route index element={<Navigate to="profile" replace />} />
             <Route path="profile" element={<Profile />} />
             <Route path="my-projects" element={<MyProjects />} />
+            <Route path="cvs" element={<CVs />} />
+            <Route path="proposals" element={<Proposals />} />
             <Route path="messages" element={<Messages />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="companies" element={<Companies />} />
           </Route>
 
           <Route path="/profile/:userId" element={<AccountLayout />}>
@@ -187,6 +205,7 @@ function AppContent() {
             <Route path="/admin/statistics" element={<AdminStatistics />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
             <Route path="/admin/banners" element={<AdminBanners />} />
+            <Route path="/admin/audit-logs" element={<AdminAuditLogs />} />
           </Route>
 
           <Route

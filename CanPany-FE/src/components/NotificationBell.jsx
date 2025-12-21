@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { useNotificationStore } from "../stores/notificationStore";
 import { useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
+import { useI18n } from "../hooks/useI18n";
 
 export default function NotificationBell() {
   const { items, markRead, fetchFromServer } = useNotificationStore();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const { t } = useI18n();
 
   // Load notifications khi component mount
   useEffect(() => {
@@ -120,15 +122,15 @@ export default function NotificationBell() {
             // Xử lý title dựa trên type
             let title = n.title || n.type;
             if (n.type === "ProposalAccepted") {
-              title = "Đề xuất đã được chấp nhận";
+              title = t("Notifications.ProposalAccepted");
             } else if (n.type === "NewMessage") {
-              title = n.title || "Bạn có tin nhắn mới";
+              title = n.title || t("Notifications.NewMessage");
             } else if (n.type === "NewProposal") {
-              title = n.title || "Đề xuất mới";
+              title = n.title || t("Notifications.NewProposal");
             } else if (n.type === "ProposalSent") {
-              title = n.title || "Đã gửi đề xuất";
+              title = n.title || t("Notifications.ProposalSent");
             } else if (n.type === "NewProject") {
-              title = n.title || "Dự án mới";
+              title = n.title || t("Notifications.NewProject");
             }
 
             return (

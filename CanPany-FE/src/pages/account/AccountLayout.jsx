@@ -1,7 +1,8 @@
 import { Outlet, NavLink, useLocation, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from "../../lib/axios";
+import apiService from "../../lib/api.service";
 import { jwtDecode } from "jwt-decode";
+import { useI18n } from "../../hooks/useI18n";
 
 export default function AccountLayout() {
   const [profile, setProfile] = useState(null);
@@ -27,48 +28,48 @@ export default function AccountLayout() {
     if (!viewedUserId) return;
 
     // 👇 tải profile của user được xem (có thể là mình hoặc người khác)
-    axios
-      .get(`api/userprofiles/by-user/${viewedUserId}`)
-      .then((res) => {
-        setProfile((prev) => ({ ...(prev || {}), ...res.data }));
+    apiService
+      .get(`/userprofiles/by-user/${viewedUserId}`)
+      .then((data) => {
+        setProfile((prev) => ({ ...(prev || {}), ...data }));
         setIsOwner(viewedUserId === currentUserId);
       })
       .catch((err) => console.error("Profile error:", err));
 
     // 👇 Lấy thông tin User để có avatarUrl và fullName
     if (viewedUserId === currentUserId) {
-      axios
-        .get("api/users/me")
-        .then((res) => {
-          const fullName = res.data?.fullName ?? res.data?.name ?? "";
-          const avatarUrl = res.data?.avatarUrl ?? "";
+      apiService
+        .get("/users/me")
+        .then((data) => {
+          const fullName = data?.fullName ?? data?.name ?? "";
+          const avatarUrl = data?.avatarUrl ?? "";
           setProfile((prev) => ({ ...(prev || {}), fullName, avatarUrl }));
         })
         .catch((err) => console.error("User error:", err));
     } else {
       // 👇 nếu là người khác thì lấy tên qua API /users/:id
-      axios
-        .get(`api/users/${viewedUserId}`)
-        .then((res) => {
-          const fullName = res.data?.fullName ?? res.data?.name ?? "";
-          const avatarUrl = res.data?.avatarUrl ?? "";
+      apiService
+        .get(`/users/${viewedUserId}`)
+        .then((data) => {
+          const fullName = data?.fullName ?? data?.name ?? "";
+          const avatarUrl = data?.avatarUrl ?? "";
           setProfile((prev) => ({ ...(prev || {}), fullName, avatarUrl }));
         })
         .catch((err) => console.error("User (viewed) error:", err));
     }
 
     // 👇 lấy đánh giá của user được xem
-    axios
-      .get(`api/reviews/by-user/${viewedUserId}`)
-      .then((res) => {
-        const reviews = res.data || [];
-        if (reviews.length > 0) {
-          const total = reviews.reduce(
+    apiService
+      .get(`/reviews/by-user/${viewedUserId}`)
+      .then((reviews) => {
+        const reviewList = reviews || [];
+        if (reviewList.length > 0) {
+          const total = reviewList.reduce(
             (sum, r) => sum + (Number(r.rating) || 0),
             0
           );
-          const avg = total / reviews.length;
-          setRating({ avg: avg.toFixed(1), count: reviews.length });
+          const avg = total / reviewList.length;
+          setRating({ avg: avg.toFixed(1), count: reviewList.length });
         } else {
           setRating({ avg: "-", count: 0 });
         }
@@ -76,13 +77,18 @@ export default function AccountLayout() {
       .catch((err) => console.error("Review error:", err));
   }, [params.userId]);
 
-  if (!profile) return <p className="p-4">Đang tải...</p>;
+  const { t } = useI18n();
+
+  if (!profile) return <p className="p-4">{t("Account.Loading")}</p>;
 
   const tabs = [
-    { to: "profile", label: "Hồ sơ cá nhân" },
-    { to: "my-projects", label: "Dự án của tôi" },
-    { to: "messages", label: "Tin nhắn" },
-    { to: "settings", label: "Cài đặt" },
+    { to: "profile", label: t("Account.PersonalProfile") },
+    { to: "my-projects", label: t("Account.MyJobs") },
+    { to: "cvs", label: t("Account.MyCVs") },
+    { to: "proposals", label: t("Account.Applications") },
+    { to: "messages", label: t("Account.Messages") },
+    { to: "companies", label: t("Account.Companies") },
+    { to: "settings", label: t("Account.Settings") },
   ];
 
   return (
@@ -108,17 +114,17 @@ export default function AccountLayout() {
             <div className="text-xl font-semibold">
               {profile.fullName && profile.fullName.trim()
                 ? profile.fullName
-                : "Người dùng ẩn"}
-              <span className="badge badge-success ml-2">Đã xác thực</span>
+                : t("Account.HiddenUser")}
+              <span className="badge badge-success ml-2">{t("Account.Verified")}</span>
             </div>
             <div className="text-sm text-slate-600">
-              {profile.title ?? "Chưa có chức danh"} •{" "}
-              {profile.location ?? "Chưa rõ"} • Tham gia{" "}
+              {profile.title ?? t("Account.NoJobTitle")} •{" "}
+              {profile.location ?? t("Account.NoLocation")} • {t("Account.Joined")}{" "}
               {profile.createdAt
                 ? new Date(profile.createdAt).toLocaleDateString("vi-VN")
                 : "-"}{" "}
               • ⭐ {rating.avg}/5{" "}
-              {rating.count > 0 ? `(${rating.count} đánh giá)` : ""}
+              {rating.count > 0 ? `(${rating.count} ${t("Account.Reviews")})` : ""}
               </div>
             </div>
           </div>
@@ -129,7 +135,7 @@ export default function AccountLayout() {
               className="btn btn-outline"
               onClick={() => setIsEditingProfile((prev) => !prev)}
             >
-              {isEditingProfile ? "Hủy chỉnh sửa" : "Chỉnh sửa hồ sơ"}
+              {isEditingProfile ? `${t("Common.Cancel")} ${t("Common.Edit")}` : `${t("Common.Edit")} ${t("Account.PersonalProfile")}`}
             </button>
           )}
         </div>
