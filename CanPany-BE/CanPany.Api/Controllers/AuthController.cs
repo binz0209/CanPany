@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Google.Apis.Auth;
 using System.Net.Mail;
 using System.Net;
+using Microsoft.Extensions.Configuration;
 
 namespace CanPany.Api.Controllers;
 
@@ -18,13 +19,15 @@ public class AuthController : ControllerBase
     private readonly IJwtTokenService _jwt;
     private readonly ILocalizationService _localization;
     private readonly IWalletService _wallet;
+    private readonly IConfiguration _config;
 
-    public AuthController(IUserService users, IJwtTokenService jwt, ILocalizationService localization, IWalletService wallet)
+    public AuthController(IUserService users, IJwtTokenService jwt, ILocalizationService localization, IWalletService wallet, IConfiguration config)
     {
         _users = users;
         _jwt = jwt;
         _localization = localization;
         _wallet = wallet;
+        _config = config;
     }
 
     public record RegisterRequest(string FullName, string Email, string Password, string Role = "User"); // Role: "Candidate" or "Company"
@@ -171,7 +174,7 @@ public class AuthController : ControllerBase
                     EnableSsl = true
                 };
 
-                var mailMessage = new MailMessage("yourgmail@gmail.com", req.Email)
+                var mailMessage = new MailMessage(fromEmail, req.Email)
                 {
                     Subject = "CanPany - Mã khôi phục mật khẩu",
                     Body = $"Mã xác thực của bạn là: {code}\nMã này sẽ hết hạn sau 10 phút.",
