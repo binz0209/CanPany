@@ -170,9 +170,9 @@ Cloudinary được sử dụng để upload và quản lý hình ảnh.
 1. Đăng ký tài khoản tại [cloudinary.com](https://cloudinary.com/)
 2. Vào Dashboard → Settings
 3. Copy các thông tin sau:
-   - **Cloud Name**: `dw4dw6yvf` (hoặc của bạn)
-   - **API Key**: `559946269895879` (hoặc của bạn)
-   - **API Secret**: `rNUHgEw5HHMc2-ymXZugIGGSHyE` (hoặc của bạn)
+   - **Cloud Name**: `your-cloud-name` (ví dụ: `abc123xyz`)
+   - **API Key**: `your-api-key` (ví dụ: `123456789012345`)
+   - **API Secret**: `your-api-secret` (ví dụ: `AbCdEfGhIjKlMnOpQrStUvWxYz`)
 
 **Lưu ý**: Thông tin trên là example, bạn cần tạo tài khoản riêng và sử dụng credentials của mình.
 

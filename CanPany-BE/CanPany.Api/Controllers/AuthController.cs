@@ -159,10 +159,15 @@ public class AuthController : ControllerBase
 
             try
             {
-                using var smtp = new SmtpClient("smtp.gmail.com")
+                var smtpHost = _config["Email:SmtpHost"] ?? "smtp.gmail.com";
+                var smtpPort = int.Parse(_config["Email:SmtpPort"] ?? "587");
+                var fromEmail = _config["Email:FromEmail"] ?? "";
+                var emailPassword = _config["Email:Password"] ?? "";
+                
+                using var smtp = new SmtpClient(smtpHost)
                 {
-                    Port = 587,
-                    Credentials = new NetworkCredential("pvapro123@gmail.com", "jtkx dauy cdmt mysg"), // App password Gmail
+                    Port = smtpPort,
+                    Credentials = new NetworkCredential(fromEmail, emailPassword),
                     EnableSsl = true
                 };
 
