@@ -1,4 +1,7 @@
+using CanPany.Api.Extensions;
+using CanPany.Application.Common.Models;
 using CanPany.Application.Interfaces.Services;
+using CanPany.Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Google.Apis.Auth;
@@ -13,14 +16,18 @@ public class AuthController : ControllerBase
 {
     private readonly IUserService _users;
     private readonly IJwtTokenService _jwt;
+    private readonly ILocalizationService _localization;
+    private readonly IWalletService _wallet;
 
-    public AuthController(IUserService users, IJwtTokenService jwt)
+    public AuthController(IUserService users, IJwtTokenService jwt, ILocalizationService localization, IWalletService wallet)
     {
         _users = users;
         _jwt = jwt;
+        _localization = localization;
+        _wallet = wallet;
     }
 
-    public record RegisterRequest(string FullName, string Email, string Password, string Role = "User");
+    public record RegisterRequest(string FullName, string Email, string Password, string Role = "User"); // Role: "Candidate" or "Company"
 
     // ✅ Cập nhật LoginRequest để có RememberMe
     public record LoginRequest(string Email, string Password, bool RememberMe = false);
@@ -33,11 +40,19 @@ public class AuthController : ControllerBase
         {
             var user = await _users.RegisterAsync(req.FullName, req.Email, req.Password, req.Role);
             var (token, exp) = _jwt.GenerateToken(user.Id, user.Email, user.Role);
-            return Ok(new { accessToken = token, expiresIn = exp });
+            var response = new { accessToken = token, expiresIn = exp };
+            var message = _localization.GetSuccess("UserCreated");
+            return Ok(ApiResponse<object>.CreateSuccess(response, message));
+        }
+        catch (Domain.Exceptions.BusinessRuleViolationException ex) when (ex.RuleName == "EmailExists")
+        {
+            var message = _localization.GetError("EmailExists");
+            return BadRequest(ApiResponse.CreateError(message, "EmailExists"));
         }
         catch (Exception ex)
         {
-            return BadRequest(new { message = ex.Message });
+            var message = _localization.GetError("ValidationFailed");
+            return BadRequest(ApiResponse.CreateError(message, "ValidationFailed"));
         }
     }
 
@@ -49,18 +64,22 @@ public class AuthController : ControllerBase
         {
             var user = await _users.ValidateUserAsync(req.Email, req.Password);
             if (user is null)
-                return Unauthorized(new { message = "Invalid credentials" });
+            {
+                var errorMsg = _localization.GetError("InvalidCredentials");
+                return Unauthorized(ApiResponse.CreateError(errorMsg, "InvalidCredentials"));
+            }
 
             // ✅ Gọi GenerateToken với RememberMe
             var (token, exp) = _jwt.GenerateToken(user.Id, user.Email, user.Role, req.RememberMe);
-
-            return Ok(new { accessToken = token, expiresIn = exp });
+            var response = new { accessToken = token, expiresIn = exp };
+            var successMsg = _localization.GetSuccess("Login");
+            return Ok(ApiResponse<object>.CreateSuccess(response, successMsg));
         }
         catch (Exception ex)
         {
             Console.WriteLine($"❌ [AuthController.Login] Error: {ex.Message}");
             Console.WriteLine($"❌ [AuthController.Login] StackTrace: {ex.StackTrace}");
-            return StatusCode(500, new { message = "Login failed", error = ex.Message });
+            return StatusCode(500, ApiResponse.CreateError(_localization.GetError("InternalServer"), "InternalServer"));
         }
     }
 
@@ -78,17 +97,34 @@ public class AuthController : ControllerBase
                     payload.Name ?? payload.Email.Split('@')[0],
                     payload.Email,
                     Guid.NewGuid().ToString(),
-                    "User"
+                    "Candidate" // Default to Candidate for Google login
                 );
+                // Wallet is automatically created in RegisterAsync
+            }
+            else
+            {
+                // Ensure wallet exists for existing users (backward compatibility)
+                try
+                {
+                    await _wallet.EnsureAsync(user.Id);
+                }
+                catch (Exception ex)
+                {
+                    // Log but don't fail login
+                    Console.WriteLine($"Warning: Failed to ensure wallet for user {user.Id}: {ex.Message}");
+                }
             }
 
             // Google login không cần RememberMe — vẫn dùng TTL mặc định
             var (token, exp) = _jwt.GenerateToken(user.Id, user.Email, user.Role);
-            return Ok(new { accessToken = token, expiresIn = exp });
+            var response = new { accessToken = token, expiresIn = exp };
+            var msg = _localization.GetSuccess("Login");
+            return Ok(ApiResponse<object>.CreateSuccess(response, msg));
         }
         catch (Exception ex)
         {
-            return BadRequest(new { message = "Google login failed", error = ex.Message });
+            var msg = _localization.GetError("InternalServer");
+            return BadRequest(ApiResponse.CreateError(msg, "InternalServer"));
         }
     }
 
@@ -102,63 +138,122 @@ public class AuthController : ControllerBase
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest req)
     {
-        var user = await _users.GetByEmailAsync(req.Email);
-        if (user == null)
-            return NotFound(new { message = "Email không tồn tại trong hệ thống." });
-
-        // Tạo mã ngẫu nhiên 6 số
-        var code = new Random().Next(100000, 999999).ToString();
-        _resetCodes[req.Email] = (code, DateTime.UtcNow.AddMinutes(10));
-
         try
         {
-            using var smtp = new SmtpClient("smtp.gmail.com")
+            if (req == null || string.IsNullOrWhiteSpace(req.Email))
             {
-                Port = 587,
-                Credentials = new NetworkCredential("pvapro123@gmail.com", "jtkx dauy cdmt mysg"), // App password Gmail
-                EnableSsl = true
-            };
+                var errorMsg = _localization.GetString("Validation_Required", new object[] { "Email" });
+                return BadRequest(ApiResponse.CreateError(errorMsg, "Validation_Required"));
+            }
 
-            var msg = new MailMessage("yourgmail@gmail.com", req.Email)
+            var user = await _users.GetByEmailAsync(req.Email);
+            if (user == null)
             {
-                Subject = "CanPany - Mã khôi phục mật khẩu",
-                Body = $"Mã xác thực của bạn là: {code}\nMã này sẽ hết hạn sau 10 phút.",
-                IsBodyHtml = false
-            };
+                var notFoundMsg = _localization.GetError("UserNotFound");
+                return NotFound(ApiResponse.CreateError(notFoundMsg, "UserNotFound"));
+            }
 
-            await smtp.SendMailAsync(msg);
+            // Tạo mã ngẫu nhiên 6 số
+            var code = new Random().Next(100000, 999999).ToString();
+            _resetCodes[req.Email] = (code, DateTime.UtcNow.AddMinutes(10));
+
+            try
+            {
+                using var smtp = new SmtpClient("smtp.gmail.com")
+                {
+                    Port = 587,
+                    Credentials = new NetworkCredential("pvapro123@gmail.com", "jtkx dauy cdmt mysg"), // App password Gmail
+                    EnableSsl = true
+                };
+
+                var mailMessage = new MailMessage("yourgmail@gmail.com", req.Email)
+                {
+                    Subject = "CanPany - Mã khôi phục mật khẩu",
+                    Body = $"Mã xác thực của bạn là: {code}\nMã này sẽ hết hạn sau 10 phút.",
+                    IsBodyHtml = false
+                };
+
+                await smtp.SendMailAsync(mailMessage);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ [AuthController.ForgotPassword] Failed to send email: {ex.Message}");
+                return StatusCode(500, ApiResponse.CreateError(_localization.GetError("EmailNotSent"), "EmailNotSent"));
+            }
+
+            var successMsg = _localization.GetSuccess("ResetCodeSent");
+            return Ok(ApiResponse.CreateSuccess(successMsg));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "Không thể gửi email", error = ex.Message });
+            Console.WriteLine($"❌ [AuthController.ForgotPassword] Error: {ex.Message}");
+            return StatusCode(500, ApiResponse.CreateError(_localization.GetError("InternalServer"), "InternalServer"));
         }
-
-        return Ok(new { message = "Mã xác thực đã được gửi về email." });
     }
 
     [AllowAnonymous]
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest req)
     {
-        if (!_resetCodes.TryGetValue(req.Email, out var data))
-            return BadRequest(new { message = "Chưa yêu cầu đặt lại mật khẩu." });
-
-        if (data.Expire < DateTime.UtcNow)
+        try
         {
+            if (req == null)
+            {
+                var msg = _localization.GetString("Validation_Required", new object[] { "Request" });
+                return BadRequest(ApiResponse.CreateError(msg, "Validation_Required"));
+            }
+            if (string.IsNullOrWhiteSpace(req.Email))
+            {
+                var msg = _localization.GetString("Validation_Required", new object[] { "Email" });
+                return BadRequest(ApiResponse.CreateError(msg, "Validation_Required"));
+            }
+            if (string.IsNullOrWhiteSpace(req.Code))
+            {
+                var msg = _localization.GetString("Validation_Required", new object[] { "Code" });
+                return BadRequest(ApiResponse.CreateError(msg, "Validation_Required"));
+            }
+            if (string.IsNullOrWhiteSpace(req.NewPassword))
+            {
+                var msg = _localization.GetString("Validation_Required", new object[] { "NewPassword" });
+                return BadRequest(ApiResponse.CreateError(msg, "Validation_Required"));
+            }
+
+            if (!_resetCodes.TryGetValue(req.Email, out var data))
+            {
+                var msg = _localization.GetError("InvalidResetCode");
+                return BadRequest(ApiResponse.CreateError(msg, "InvalidResetCode"));
+            }
+
+            if (data.Expire < DateTime.UtcNow)
+            {
+                _resetCodes.Remove(req.Email);
+                var msg = _localization.GetError("InvalidResetCode");
+                return BadRequest(ApiResponse.CreateError(msg, "InvalidResetCode"));
+            }
+
+            if (data.Code != req.Code)
+            {
+                var msg = _localization.GetError("InvalidResetCode");
+                return BadRequest(ApiResponse.CreateError(msg, "InvalidResetCode"));
+            }
+
+            var user = await _users.GetByEmailAsync(req.Email);
+            if (user == null)
+            {
+                var msg = _localization.GetError("UserNotFound");
+                return NotFound(ApiResponse.CreateError(msg, "UserNotFound"));
+            }
+
+            await _users.UpdatePasswordAsync(user.Id, req.NewPassword);
             _resetCodes.Remove(req.Email);
-            return BadRequest(new { message = "Mã xác thực đã hết hạn." });
+
+            var successMsg = _localization.GetSuccess("PasswordReset");
+            return Ok(ApiResponse.CreateSuccess(successMsg));
         }
-
-        if (data.Code != req.Code)
-            return BadRequest(new { message = "Mã xác thực không đúng." });
-
-        var user = await _users.GetByEmailAsync(req.Email);
-        if (user == null)
-            return NotFound(new { message = "Không tìm thấy người dùng." });
-
-        await _users.UpdatePasswordAsync(user.Id, req.NewPassword);
-        _resetCodes.Remove(req.Email);
-
-        return Ok(new { message = "Mật khẩu đã được đặt lại thành công." });
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ [AuthController.ResetPassword] Error: {ex.Message}");
+            return StatusCode(500, ApiResponse.CreateError(_localization.GetError("PasswordChangeFailed"), "PasswordChangeFailed"));
+        }
     }
 }

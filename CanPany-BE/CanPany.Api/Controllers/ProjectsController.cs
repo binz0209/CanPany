@@ -42,11 +42,17 @@ public class ProjectsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] Project dto)
     {
-        var created = await _svc.CreateAsync(dto);
-        
-        // 🔔 Gửi notification "dự án mới" cho tất cả users (trừ owner)
         try
         {
+            if (dto == null)
+                return BadRequest(new { message = "Project data is required" });
+
+            var created = await _svc.CreateAsync(dto);
+            
+            // 🔔 Gửi notification "dự án mới" cho tất cả users (trừ owner)
+            // Wrap trong try-catch riêng để không ảnh hưởng đến việc tạo project
+            try
+            {
             Console.WriteLine($"📩 [ProjectsController.Create] Starting notification creation for project: {created.Id}");
             
             // Lấy danh sách tất cả users
@@ -99,42 +105,61 @@ public class ProjectsController : ControllerBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ [ProjectsController.Create] Failed to send project notifications: {ex.Message}");
-            Console.WriteLine($"❌ [ProjectsController.Create] Stack trace: {ex.StackTrace}");
-        }
+                Console.WriteLine($"❌ [ProjectsController.Create] Failed to send project notifications: {ex.Message}");
+                Console.WriteLine($"❌ [ProjectsController.Create] Stack trace: {ex.StackTrace}");
+            }
 
-        return Ok(created);
+            return Ok(created);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ [ProjectsController.Create] Error creating project: {ex.Message}");
+            return StatusCode(500, new { message = "Failed to create project", error = ex.Message });
+        }
     }
 
     [Authorize] // chỉ cần đăng nhập
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(string id, [FromBody] Project dto)
     {
-        // lấy userId từ JWT
-        var currentUserId =
-            User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? User.FindFirst("sub")?.Value
-            ?? User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
+        try
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                return BadRequest(new { message = "Project ID is required" });
+            if (dto == null)
+                return BadRequest(new { message = "Project data is required" });
 
-        if (string.IsNullOrEmpty(currentUserId))
-            return Unauthorized();
+            // lấy userId từ JWT
+            var currentUserId =
+                User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? User.FindFirst("sub")?.Value
+                ?? User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
 
-        // lấy project hiện tại
-        var existing = await _svc.GetByIdAsync(id);
-        if (existing is null) return NotFound();
+            if (string.IsNullOrEmpty(currentUserId))
+                return Unauthorized();
 
-        // chỉ owner mới được sửa
-        if (!string.Equals(existing.OwnerId, currentUserId, StringComparison.Ordinal))
-            return Forbid(); // 403
+            // lấy project hiện tại
+            var existing = await _svc.GetByIdAsync(id);
+            if (existing is null) return NotFound(new { message = "Project not found" });
 
-        // gán lại Id để chắc chắn update đúng bản ghi
-        dto.Id = id;
-        // (tuỳ bạn: có thể chặn đổi OwnerId, CreatedAt, v.v.)
-        dto.OwnerId = existing.OwnerId;
-        dto.CreatedAt = existing.CreatedAt;
+            // chỉ owner mới được sửa
+            if (!string.Equals(existing.OwnerId, currentUserId, StringComparison.Ordinal))
+                return Forbid(); // 403
 
-        var updated = await _svc.UpdateAsync(id, dto);
-        return Ok(updated);
+            // gán lại Id để chắc chắn update đúng bản ghi
+            dto.Id = id;
+            // (tuỳ bạn: có thể chặn đổi OwnerId, CreatedAt, v.v.)
+            dto.OwnerId = existing.OwnerId;
+            dto.CreatedAt = existing.CreatedAt;
+
+            var updated = await _svc.UpdateAsync(id, dto);
+            return Ok(updated);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ [ProjectsController.Update] Error updating project: {ex.Message}");
+            return StatusCode(500, new { message = "Failed to update project", error = ex.Message });
+        }
     }
 
     [Authorize(Roles = "Admin")]

@@ -20,12 +20,18 @@
 		<!-- Swashbuckle bản 6.x là tương thích .NET 8 -->
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
+		<PackageReference Include="StackExchange.Redis" Version="2.8.16" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\CanPany.Application\CanPany.Application.csproj" />
 		<ProjectReference Include="..\CanPany.Domain\CanPany.Domain.csproj" />
 		<ProjectReference Include="..\CanPany.Infrastructure\CanPany.Infrastructure.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- Exclude Program.Refactored.cs from compilation to avoid top-level statements conflict -->
+		<Compile Remove="Program.Refactored.cs" />
 	</ItemGroup>
 
 </Project>

@@ -43,7 +43,11 @@ services.AddSingleton<IMongoInitializer, MongoInitializer>();
 services.AddHostedService<MongoInitializerHostedService>();
 
 // ========== Controllers ==========
-services.AddControllers();
+services.AddControllers(options =>
+{
+    // Add global exception filter
+    options.Filters.Add<CanPany.Api.Filters.ApiExceptionFilter>();
+});
 
 // ========== Swagger ==========
 services.AddEndpointsApiExplorer();
@@ -52,7 +56,39 @@ services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "CanPany API", Version = "v1" });
 
     // 👇 DÙNG FULL NAME để tránh trùng (loại bỏ dấu '+'' của nested type)
-    c.CustomSchemaIds(t => t.FullName!.Replace('+', '.'));
+    c.CustomSchemaIds(t =>
+    {
+        if (t.FullName == null)
+            return t.Name;
+        return t.FullName.Replace('+', '.');
+    });
+
+    // Ignore obsolete properties
+    c.IgnoreObsoleteProperties();
+    
+    // Map types to avoid schema generation errors
+    c.MapType<System.DateTime>(() => new Microsoft.OpenApi.Models.OpenApiSchema
+    {
+        Type = "string",
+        Format = "date-time"
+    });
+    
+    c.MapType<System.DateTimeOffset>(() => new Microsoft.OpenApi.Models.OpenApiSchema
+    {
+        Type = "string",
+        Format = "date-time"
+    });
+    
+    // Configure Swagger to handle file uploads (IFormFile)
+    c.MapType<IFormFile>(() => new Microsoft.OpenApi.Models.OpenApiSchema
+    {
+        Type = "string",
+        Format = "binary"
+    });
+    
+    // Add operation filter to handle file uploads properly
+    // This filter converts IFormFile parameters to multipart/form-data request body
+    c.OperationFilter<CanPany.Api.Filters.FileUploadOperationFilter>();
 
     var securityScheme = new OpenApiSecurityScheme
     {
@@ -169,6 +205,11 @@ services.AddScoped<IAuditLogRepository>(sp =>
     new AuditLogRepository(sp.GetRequiredService<MongoDbContext>().AuditLogs));
 services.AddScoped<IAuditService, AuditService>();
 
+// ========== I18N / Localization Services ==========
+services.AddHttpContextAccessor(); // Required for LocalizationService
+services.AddScoped<II18nService, CanPany.Application.Services.I18nService>();
+services.AddScoped<ILocalizationService, CanPany.Infrastructure.Localization.LocalizationService>();
+
 // ========== Services (Application) ==========
 services.AddScoped<IUserService, UserService>();
 services.AddScoped<IUserProfileService, UserProfileService>();
@@ -190,6 +231,7 @@ services.AddScoped<IBannerService, BannerService>();
 // ========== APRS - New Services ==========
 services.AddScoped<ICompanyService, CompanyService>();
 services.AddScoped<IJobService, JobService>();
+services.AddScoped<ICVService, CVService>();
 
 // ========== Cloudinary Image Upload ==========
 services.Configure<CloudinaryOptions>(config.GetSection("Cloudinary"));
@@ -212,7 +254,38 @@ services.AddSingleton<CanPany.Infrastructure.Services.EmailService>(sp =>
 });
 services.AddScoped<IEmailService, EmailServiceAdapter>();
 
+// ========== Redis Background Jobs ==========
+services.AddSingleton<StackExchange.Redis.IConnectionMultiplexer>(sp =>
+{
+    var connectionString = config.GetConnectionString("Redis") ?? "localhost:6379";
+    return StackExchange.Redis.ConnectionMultiplexer.Connect(connectionString);
+});
+
+// Register Background Job Service
+services.AddScoped<IBackgroundJobService, CanPany.Infrastructure.Services.RedisBackgroundJobService>();
+
+// Register Job Handlers
+services.AddScoped<CanPany.Infrastructure.Services.SendEmailJobHandler>();
+services.AddScoped<CanPany.Infrastructure.Services.ProcessPaymentJobHandler>();
+services.AddScoped<CanPany.Infrastructure.Services.GenerateReportJobHandler>();
+
+// Register Background Worker (có thể chạy nhiều workers)
+var workerCount = config.GetValue<int>("BackgroundJobs:WorkerCount", 2);
+for (int i = 0; i < workerCount; i++)
+{
+    services.AddHostedService<CanPany.Infrastructure.Services.BackgroundJobWorker>();
+}
+
 var app = builder.Build();
+
+// ========== Language Detection ==========
+// Language Detection Middleware - Phải đặt TRƯỚC các middleware khác để set language cho I18N
+app.UseMiddleware<CanPany.Api.Middlewares.LanguageDetectionMiddleware>();
+
+// ========== Global Exception Handling ==========
+// Global Exception Handler Middleware - Đảm bảo không có exception nào làm hệ thống dừng
+app.UseMiddleware<CanPany.Api.Middlewares.GlobalExceptionHandlerMiddleware>();
+
 app.UseExceptionHandler(errorApp =>
 {
     errorApp.Run(async context =>
@@ -256,11 +329,19 @@ app.Map("/__error", (HttpContext http, ILoggerFactory lf) =>
 // CORS PHẢI được đặt ở đầu pipeline để xử lý preflight OPTIONS requests
 app.UseCors(CorsPolicy);
 
-app.UseSwagger();
+app.UseSwagger(c =>
+{
+    c.RouteTemplate = "swagger/{documentName}/swagger.json";
+});
+
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "CanPany API v1");
     c.RoutePrefix = "swagger";
+    c.DisplayRequestDuration();
+    c.EnableDeepLinking();
+    c.EnableFilter();
+    c.EnableValidator();
 });
 
 app.Lifetime.ApplicationStarted.Register(() =>
