@@ -73,20 +73,20 @@ const Dashboard = () => {
       }).length;
       const userChange = calculateChange(usersThisMonth, usersLastMonth);
 
-      // Get all projects
-      const projectsRes = await api.get('/projects').catch(err => {
-        console.error('Failed to fetch projects:', err);
+      // Get all jobs
+      const jobsRes = await api.get('/jobs').catch(err => {
+        console.error('Failed to fetch jobs:', err);
         return { data: [] };
       });
-      const projects = projectsRes.data || [];
-      const totalProjects = projects.length;
+      const jobs = jobsRes.data || [];
+      const totalProjects = jobs.length;
       
-      // Calculate projects this month vs last month
-      const projectsThisMonth = projects.filter(p => {
+      // Calculate jobs this month vs last month
+      const projectsThisMonth = jobs.filter(p => {
         const createdAt = new Date(p.createdAt || p.CreatedAt);
         return createdAt >= startOfThisMonth;
       }).length;
-      const projectsLastMonth = projects.filter(p => {
+      const projectsLastMonth = jobs.filter(p => {
         const createdAt = new Date(p.createdAt || p.CreatedAt);
         return createdAt >= startOfLastMonth && createdAt <= endOfLastMonth;
       }).length;
@@ -179,7 +179,7 @@ const Dashboard = () => {
       }
       setRevenueData(revenueChartData);
 
-      // Projects chart - last 7 days
+      // Jobs chart - last 7 days
       const projectChartData = [];
       const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
       for (let i = 6; i >= 0; i--) {
@@ -189,7 +189,7 @@ const Dashboard = () => {
         const dayEnd = new Date(dayStart);
         dayEnd.setHours(23, 59, 59, 999);
         
-        const dayProjects = projects.filter(p => {
+        const dayProjects = jobs.filter(p => {
           const createdAt = new Date(p.createdAt || p.CreatedAt);
           return createdAt >= dayStart && createdAt <= dayEnd;
         }).length;

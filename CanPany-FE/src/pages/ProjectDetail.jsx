@@ -13,8 +13,8 @@ import Input from "../components/ui/input";
 export default function ProjectDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [project, setProject] = useState(null);
-  const [owner, setOwner] = useState(null);
+  const [project, setProject] = useState(null); // Job
+  const [owner, setOwner] = useState(null);     // Company
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [isOwner, setIsOwner] = useState(false);
@@ -48,27 +48,28 @@ export default function ProjectDetail() {
   }, [id]);
 
   useEffect(() => {
-    if (project && currentUserId) {
-      setIsOwner(project.ownerId === currentUserId);
-      if (isOwner) {
+    if (owner && currentUserId) {
+      const isOwnerUser = owner.userId === currentUserId;
+      setIsOwner(isOwnerUser);
+      if (isOwnerUser) {
         loadProposals();
       }
     }
-  }, [project, currentUserId, isOwner]);
+  }, [owner, currentUserId]);
 
   const loadProject = async () => {
     try {
       setLoading(true);
-      const data = await apiService.get(`/projects/${id}`);
+      const data = await apiService.get(`/jobs/${id}`);
       setProject(data);
       
-      // Load owner info
-      if (data.ownerId) {
+      // Load company info
+      if (data.companyId) {
         try {
-          const ownerData = await apiService.get(`/users/${data.ownerId}`);
-          setOwner(ownerData);
+          const company = await apiService.get(`/companies/${data.companyId}`);
+          setOwner(company);
         } catch (e) {
-          console.error("Error loading owner:", e);
+          console.error("Error loading company:", e);
         }
       }
     } catch (error) {
@@ -83,7 +84,7 @@ export default function ProjectDetail() {
   const loadProposals = async () => {
     try {
       setLoadingProposals(true);
-      const data = await apiService.get(`/proposals/by-project/${id}`);
+      const data = await apiService.get(`/applications/job/${id}`);
       setProposals(data || []);
     } catch (error) {
       console.error("Error loading proposals:", error);
@@ -102,14 +103,15 @@ export default function ProjectDetail() {
 
     try {
       setSubmittingProposal(true);
-      await apiService.post("/proposals", {
-        projectId: id,
-        freelancerId: currentUserId,
+      await apiService.post("/applications", {
+        jobId: id,
+        candidateId: currentUserId,
+        cvId: null,
         coverLetter: proposalData.coverLetter,
-        bidAmount: parseFloat(proposalData.bidAmount),
+        status: "Pending",
       });
 
-      toast.success("Đã gửi đề xuất thành công!");
+      toast.success("Đã gửi ứng tuyển thành công!");
       setShowProposalForm(false);
       setProposalData({ coverLetter: "", bidAmount: "" });
       
@@ -129,16 +131,11 @@ export default function ProjectDetail() {
     if (!confirm("Bạn có chắc chắn muốn chấp nhận đề xuất này?")) return;
 
     try {
-      const data = await apiService.post(`/proposals/${proposalId}/accept`);
-      toast.success("Đã chấp nhận đề xuất! Hợp đồng đã được tạo.");
-      
-      // Navigate to contract if contractId is returned
-      if (data?.contractId) {
-        navigate(`/contracts/${data.contractId}`);
-      } else {
-        loadProposals();
-        loadProject();
-      }
+      await apiService.patch(`/applications/${proposalId}/status`, {
+        status: "Accepted",
+      });
+      toast.success("Đã chấp nhận ứng tuyển!");
+      loadProposals();
     } catch (error) {
       console.error("Error accepting proposal:", error);
       toast.error(error?.message || error?.response?.data?.message || "Không thể chấp nhận đề xuất");

@@ -14,11 +14,13 @@ public class UserServiceTests
     private readonly Mock<IUserRepository> _mockUserRepo;
     private readonly Mock<IUserProfileService> _mockProfileService;
     private readonly UserService _userService;
+    private readonly Mock<IWalletService> _mockWalletService;
 
     public UserServiceTests()
     {
         _mockUserRepo = new Mock<IUserRepository>();
         _mockProfileService = new Mock<IUserProfileService>();
+        _mockWalletService = new Mock<IWalletService>();
         var mockLogger = new Mock<ILogger<UserService>>();
         var mockI18n = new Mock<II18nService>();
         // Setup default I18N behavior - return key if not found
@@ -31,7 +33,7 @@ public class UserServiceTests
         mockI18n.Setup(x => x.GetLogging(It.IsAny<string>(), It.IsAny<object[]>()))
             .Returns<string, object[]>((key, args) => key);
         
-        _userService = new UserService(_mockUserRepo.Object, _mockProfileService.Object, mockLogger.Object, mockI18n.Object);
+        _userService = new UserService(_mockUserRepo.Object, _mockProfileService.Object, _mockWalletService.Object, mockLogger.Object, mockI18n.Object);
     }
 
     [Fact]

@@ -24,7 +24,7 @@ public class PaymentService : IPaymentService
         _walletTxns = walletTxns;
     }
 
-    public async Task<string> CreateTopUpAsync(string userId, decimal amount, string ip, CancellationToken ct = default)
+    public async Task<string> CreateTopUpAsync(string userId, long amount, string ip, CancellationToken ct = default)
     {
         var wallet = await _wallets.GetOrCreateByUserAsync(userId, ct);
         var shortUser = userId.Length >= 6 ? userId[..6] : userId;
@@ -42,9 +42,7 @@ public class PaymentService : IPaymentService
         };
         await _payments.InsertAsync(payment, ct);
 
-        // VNPAY nhận integer VND -> round
-        var amountVnd = (long)Math.Round(amount, MidpointRounding.AwayFromZero);
-        var url = _vnPay.CreatePaymentUrl(txnRef, amountVnd, ip, $"Topup wallet {wallet.Id}");
+        var url = _vnPay.CreatePaymentUrl(txnRef, amount, ip, $"Topup wallet {wallet.Id}");
         return url;
     }
 
@@ -82,7 +80,7 @@ public class PaymentService : IPaymentService
             pay.PaidAt = DateTime.UtcNow;
 
             var wallet = await _wallets.GetOrCreateByUserAsync(pay.UserId, ct);
-            wallet.Balance += (long)Math.Round(pay.Amount, MidpointRounding.AwayFromZero);
+            wallet.Balance += pay.Amount;
             wallet.UpdatedAt = DateTime.UtcNow;
             await _wallets.UpdateAsync(wallet, ct);
 
@@ -92,7 +90,7 @@ public class PaymentService : IPaymentService
                 UserId = pay.UserId,
                 PaymentId = pay.Id,
                 Type = "TopUp",
-                Amount = (long)Math.Round(pay.Amount, MidpointRounding.AwayFromZero),
+                Amount = pay.Amount,
                 BalanceAfter = wallet.Balance,
                 Note = $"TopUp via VNPAY {pay.Vnp_TransactionNo}"
             }, ct);

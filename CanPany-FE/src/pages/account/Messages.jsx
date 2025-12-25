@@ -269,7 +269,7 @@ export default function Messages() {
     load();
   }, [currentUserId]);
 
-  // Load thông tin Project (tên + chủ project)
+  // Load thông tin Job (tên + chủ)
   const [projectsMap, setProjectsMap] = useState(new Map());
 
   useEffect(() => {
@@ -285,15 +285,11 @@ export default function Messages() {
       for (const pid of ids) {
         if (newMap.has(pid)) continue;
         try {
-          const res = await api.get(`/projects/${pid}`);
-          const proj = res.data || {};
+          const res = await api.get(`/jobs/${pid}`);
+          const job = res.data || {};
           const title =
-            proj.title || proj.name || proj.projectName || "(Không tên)";
-          const owner =
-            proj.ownerName ||
-            proj.createdByName ||
-            proj.owner?.fullName ||
-            "(Chưa rõ)";
+            job.title || job.name || "(Không tên)";
+          const owner = "(Không rõ công ty)";
           newMap.set(pid, { title, owner });
         } catch {
           newMap.set(pid, { title: "(Không tìm thấy)", owner: "" });

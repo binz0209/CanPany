@@ -22,7 +22,7 @@ public class Payment
     public string Purpose { get; set; } = "TopUp";
 
     [BsonElement("amount")]
-    public decimal Amount { get; set; }       // decimal theo file gốc
+    public long Amount { get; set; }          // VND minor units
 
     [BsonElement("currency")]
     public string Currency { get; set; } = "VND";

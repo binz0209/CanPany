@@ -204,7 +204,7 @@ export default function Projects() {
   // ===== stats base (ALL) =====
   useEffect(() => {
     apiService
-      .get("/projects")
+      .get("/jobs")
       .then((data) => setStatsBase(data || []))
       .catch((err) => console.error("Load all projects for stats error:", err));
   }, []);
@@ -213,7 +213,7 @@ export default function Projects() {
   useEffect(() => {
     setLoading(true);
     apiService
-      .get("/projects")
+      .get("/jobs")
       .then((data) => setProjects(data || []))
       .catch((err) => console.error("Load projects error:", err))
       .finally(() => setLoading(false));
@@ -224,12 +224,12 @@ export default function Projects() {
     if (sortOrder === "related" && currentUserId) {
       setLoadingRecommended(true);
       apiService
-        .get("/projects/recommended?limit=100")
+        .get(`/jobs/recommended?limit=100&candidateId=${currentUserId}`)
         .then((data) => {
           const items = data || [];
           setRecommendedProjects(
             items.map((item) => ({
-              ...item.project,
+              ...(item.job || {}),
               similarity: item.similarity,
             }))
           );

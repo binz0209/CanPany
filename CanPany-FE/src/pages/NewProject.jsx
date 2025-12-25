@@ -118,17 +118,25 @@ export default function NewProject() {
         ? new Date(`${deadline}T00:00:00`).toISOString()
         : null;
 
+      // Map form -> Job entity
+      const salary = budgetAmount ? Number(budgetAmount) : 0;
       const payload = {
-        ownerId: currentUserId,
+        // TẠM THỜI: dùng userId như companyId (sau này có company thật sẽ map lại)
+        companyId: currentUserId,
         title,
         description,
-        categoryId: categoryId || null,
-        skillIds: skills,
-        budgetType,
-        budgetAmount: budgetAmount ? Number(budgetAmount) : 0,
-        deadline: deadlineIso,
+        requiredSkills: skills, // danh sách skillId
+        jobType: budgetType === "Hourly" ? "Contract" : "FullTime",
+        location: "", // có thể bổ sung trường location riêng sau
+        salaryRange:
+          salary > 0
+            ? { min: salary, max: salary, currency: "VND" }
+            : null,
+        experienceLevel: "Mid",
         status: "Open",
-        images: images, // Thêm images vào payload
+        premiumBoost: false,
+        images,
+        // deadline vẫn lưu tạm trong description hoặc sẽ thêm field ở backend nếu cần
       };
 
       // ① KIỂM TRA SỐ DƯ (không trừ tiền)
@@ -146,10 +154,11 @@ export default function NewProject() {
         }
       }
 
-      // ② TẠO PROJECT (không rút tiền ở bước này)
-      await api.post("/projects", payload);
+      // ② TẠO JOB (không rút tiền ở bước này)
+      await api.post("/jobs", payload);
 
       alert(t("NewProject.PostSuccess"));
+      // Tạm thời vẫn điều hướng về trang projects (sau này sẽ rename sang jobs)
       navigate("/projects");
     } catch (e) {
       console.error("Create project failed", e?.response?.data || e);

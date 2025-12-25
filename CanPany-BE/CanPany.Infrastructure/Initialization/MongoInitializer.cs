@@ -75,6 +75,11 @@ public class MongoInitializer : IMongoInitializer
         await EnsureCollection(_opt.Collections.UserSettings);
         await EnsureCollection(_opt.Collections.Banners);
 
+        // Jobs / Applications / Companies
+        await EnsureCollection(_opt.Collections.Companies);
+        await EnsureCollection(_opt.Collections.Jobs);
+        await EnsureCollection(_opt.Collections.Applications);
+
         // ===== Indexes =====
 
         // Payments: unique vnp_TxnRef + search helpers

@@ -52,5 +52,5 @@ public class PaymentsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll() => Ok(await _paymentService.GetAllAsync());
 
-    public record TopupRequest(string UserId, decimal Amount);
+    public record TopupRequest(string UserId, long Amount);
 }

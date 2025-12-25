@@ -232,6 +232,7 @@ services.AddScoped<IBannerService, BannerService>();
 services.AddScoped<ICompanyService, CompanyService>();
 services.AddScoped<IJobService, JobService>();
 services.AddScoped<ICVService, CVService>();
+services.AddScoped<IApplicationService, ApplicationService>();
 
 // ========== Cloudinary Image Upload ==========
 services.Configure<CloudinaryOptions>(config.GetSection("Cloudinary"));

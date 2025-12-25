@@ -36,7 +36,7 @@ const Projects = () => {
   const fetchProjects = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/projects');
+      const response = await api.get('/jobs');
       setProjects(response.data || []);
     } catch (error) {
       console.error('Error fetching projects:', error);
@@ -166,14 +166,22 @@ const Projects = () => {
     try {
       if (editingProject) {
         // Update
-        await api.put(`/projects/${editingProject.id}`, {
+        await api.put(`/jobs/${editingProject.id}`, {
+          companyId: editingProject.companyId || null,
           title: formData.title,
           description: formData.description,
-          budgetAmount: Number(formData.budgetAmount),
+          requiredSkills: editingProject.requiredSkills || [],
+          jobType: 'FullTime',
+          location: '',
+          salaryRange: formData.budgetAmount
+            ? { min: Number(formData.budgetAmount), max: Number(formData.budgetAmount), currency: 'VND' }
+            : null,
+          experienceLevel: 'Mid',
           status: formData.status,
-          categoryId: formData.categoryId
+          premiumBoost: false,
+          images: [],
         });
-        toast.success('Cập nhật dự án thành công');
+        toast.success('Cập nhật job thành công');
       } else {
         // Create - Note: Need ownerId, might need to get from current user
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -182,15 +190,22 @@ const Projects = () => {
           return;
         }
         // For admin create, we might need ownerId - using a default or current admin
-        await api.post('/projects', {
+        await api.post('/jobs', {
+          companyId: null,
           title: formData.title,
           description: formData.description,
-          budgetAmount: Number(formData.budgetAmount),
+          requiredSkills: [],
+          jobType: 'FullTime',
+          location: '',
+          salaryRange: formData.budgetAmount
+            ? { min: Number(formData.budgetAmount), max: Number(formData.budgetAmount), currency: 'VND' }
+            : null,
+          experienceLevel: 'Mid',
           status: formData.status,
-          categoryId: formData.categoryId,
-          ownerId: editingProject?.ownerId || null // Admin might need to specify owner
+          premiumBoost: false,
+          images: [],
         });
-        toast.success('Tạo dự án thành công');
+        toast.success('Tạo job thành công');
       }
       closeModal();
       fetchProjects();
@@ -204,8 +219,8 @@ const Projects = () => {
     if (!confirm('Bạn có chắc muốn xóa dự án này?')) return;
     
     try {
-      await api.delete(`/projects/${projectId}`);
-      toast.success('Xóa dự án thành công');
+      await api.delete(`/jobs/${projectId}`);
+      toast.success('Xóa job thành công');
       fetchProjects();
     } catch (error) {
       console.error('Error deleting project:', error);

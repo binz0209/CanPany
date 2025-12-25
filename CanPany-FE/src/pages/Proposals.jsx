@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "../lib/axios";
+import api from "../lib/axios";
 import { jwtDecode } from "jwt-decode";
 import Button from "../components/ui/button";
 import Spinner from "../components/Spinner";
@@ -10,7 +10,7 @@ import { toast } from "sonner";
 
 export default function Proposals() {
   const navigate = useNavigate();
-  const [proposals, setProposals] = useState([]);
+  const [proposals, setProposals] = useState([]); // Job applications
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [filter, setFilter] = useState("all"); // all, pending, accepted, rejected, cancelled
@@ -40,7 +40,8 @@ export default function Proposals() {
   const loadProposals = async () => {
     try {
       setLoading(true);
-      let data = await apiService.get(`/proposals/by-freelancer/${currentUserId}`);
+      let data = await api.get(`/applications/candidate/${currentUserId}`);
+      data = data?.data || data || [];
       data = data || [];
       
       // Filter proposals
@@ -58,31 +59,15 @@ export default function Proposals() {
   };
 
   const handleCancelProposal = async (proposalId) => {
-    if (!confirm("Bạn có chắc chắn muốn hủy đề xuất này?")) return;
+    if (!confirm("Bạn có chắc chắn muốn hủy ứng tuyển này?")) return;
 
     try {
-      await apiService.post(`/proposals/${proposalId}/cancel`);
-      toast.success("Đã hủy đề xuất");
+      await api.patch(`/applications/${proposalId}/status`, { status: "Withdrawn" });
+      toast.success("Đã hủy ứng tuyển");
       loadProposals();
     } catch (error) {
-      console.error("Error cancelling proposal:", error);
-      toast.error(error?.message || error?.response?.data?.message || "Không thể hủy đề xuất");
-    }
-  };
-
-  const handleEditProposal = async (proposalId, newBid) => {
-    if (!newBid || parseFloat(newBid) <= 0) {
-      toast.error("Vui lòng nhập giá hợp lệ");
-      return;
-    }
-
-    try {
-      await apiService.put(`/proposals/${proposalId}/edit`, parseFloat(newBid));
-      toast.success("Đã cập nhật đề xuất");
-      loadProposals();
-    } catch (error) {
-      console.error("Error editing proposal:", error);
-      toast.error(error?.message || error?.response?.data?.message || "Không thể cập nhật đề xuất");
+      console.error("Error cancelling application:", error);
+      toast.error(error?.message || error?.response?.data?.message || "Không thể hủy ứng tuyển");
     }
   };
 
@@ -94,7 +79,7 @@ export default function Proposals() {
         return "success";
       case "rejected":
         return "destructive";
-      case "cancelled":
+      case "withdrawn":
         return "secondary";
       default:
         return "outline";
@@ -109,8 +94,8 @@ export default function Proposals() {
         return "Đã chấp nhận";
       case "rejected":
         return "Đã từ chối";
-      case "cancelled":
-        return "Đã hủy";
+      case "withdrawn":
+        return "Đã rút";
       default:
         return status;
     }
@@ -156,8 +141,8 @@ export default function Proposals() {
       {/* Proposals List */}
       {proposals.length === 0 ? (
         <Card className="p-12 text-center">
-          <p className="text-gray-500 mb-4">Bạn chưa có đề xuất nào</p>
-          <Button onClick={() => navigate("/projects")}>Xem dự án</Button>
+          <p className="text-gray-500 mb-4">Bạn chưa có ứng tuyển nào</p>
+          <Button onClick={() => navigate("/projects")}>Xem job</Button>
         </Card>
       ) : (
         <div className="space-y-4">
@@ -167,10 +152,10 @@ export default function Proposals() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <Link
-                      to={`/projects/${proposal.projectId}`}
+                      to={`/projects/${proposal.jobId}`}
                       className="text-xl font-semibold text-blue-600 hover:underline"
                     >
-                      Xem dự án
+                      Xem job
                     </Link>
                     <Badge variant={getStatusBadgeVariant(proposal.status)}>
                       {getStatusLabel(proposal.status)}
@@ -184,11 +169,6 @@ export default function Proposals() {
                   )}
 
                   <div className="flex items-center gap-4 text-sm text-gray-600">
-                    {proposal.bidAmount && (
-                      <span className="font-semibold text-green-600">
-                        {proposal.bidAmount.toLocaleString("vi-VN")} VNĐ
-                      </span>
-                    )}
                     <span>
                       {new Date(proposal.createdAt).toLocaleString("vi-VN")}
                     </span>
@@ -201,34 +181,11 @@ export default function Proposals() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          const newBid = prompt(
-                            "Nhập giá mới:",
-                            proposal.bidAmount?.toString() || ""
-                          );
-                          if (newBid) {
-                            handleEditProposal(proposal.id, newBid);
-                          }
-                        }}
-                      >
-                        Sửa giá
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
                         onClick={() => handleCancelProposal(proposal.id)}
                       >
-                        Hủy
+                        Rút ứng tuyển
                       </Button>
                     </>
-                  )}
-                  {proposal.status === "Accepted" && (
-                    <Button
-                      size="sm"
-                      onClick={() => navigate(`/contracts/${proposal.contractId || ""}`)}
-                    >
-                      Xem hợp đồng
-                    </Button>
                   )}
                 </div>
               </div>

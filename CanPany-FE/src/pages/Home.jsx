@@ -24,16 +24,16 @@ export default function Home() {
       .then(res => setFreelancers(res.data ?? []))
       .catch(err => console.error("Load freelancers failed", err));
 
-    // Load recommended projects nếu đã đăng nhập
+    // Load recommended jobs nếu đã đăng nhập
     const token = localStorage.getItem("token") || sessionStorage.getItem("token");
     if (token) {
       try {
         setIsLoggedIn(true);
-        api.get("/projects/recommended?limit=6")
+        api.get("/jobs/recommended?limit=6")
           .then(res => {
             const data = res.data || [];
             setRecommendedProjects(data.map(item => ({
-              ...item.project,
+              ...item.job,
               similarity: item.similarity
             })));
           })
@@ -85,7 +85,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Recommended Projects (chỉ hiển thị khi đã đăng nhập) */}
+      {/* Recommended Jobs (chỉ hiển thị khi đã đăng nhập) */}
       {isLoggedIn && recommendedProjects.length > 0 && (
         <section className="bg-gradient-to-br from-blue-50 to-purple-50 border-y">
           <div className="container-ld py-12">
@@ -96,28 +96,30 @@ export default function Home() {
               </Link>
             </div>
             <div className="mt-6 grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {recommendedProjects.map((project) => (
-                <div key={project.id} className="card p-5 hover:shadow-lg transition-shadow">
+              {recommendedProjects.map((job) => (
+                <div key={job.id} className="card p-5 hover:shadow-lg transition-shadow">
                   <div className="flex items-start justify-between mb-3">
-                    <h3 className="font-semibold text-lg flex-1">{project.title}</h3>
-                    {project.similarity !== undefined && (
+                    <h3 className="font-semibold text-lg flex-1">{job.title}</h3>
+                    {job.similarity !== undefined && (
                       <span className="ml-2 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                        {project.similarity}{t("Home.MatchPercentage")}
+                        {job.similarity}{t("Home.MatchPercentage")}
                       </span>
                     )}
                   </div>
                   <p className="text-sm text-slate-600 line-clamp-2 mb-3">
-                    {project.description}
+                    {job.description}
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="text-brand-700 font-semibold">
-                      {project.budgetAmount?.toLocaleString("vi-VN") ?? "—"} đ
+                      {job.salaryRange?.min
+                        ? `${Number(job.salaryRange.min).toLocaleString("vi-VN")} đ`
+                        : "—"}
                     </div>
                     <Button 
                       variant="outline" 
                       size="sm"
                       as={Link}
-                      to={`/account/projects?view=${project.id}`}
+                      to={`/account/projects?view=${job.id}`}
                     >
                       {t("Home.ViewDetails")}
                     </Button>

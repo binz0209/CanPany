@@ -56,10 +56,10 @@ export default function NotificationBell() {
     }
 
     // Xử lý navigation dựa trên type
-    if (n.type === "NewProject") {
-      const projectId = n.payloadObj?.projectId;
-      if (projectId) {
-        navigate(`/projects/${projectId}`);
+    if (n.type === "NewProject" || n.type === "NewJob") {
+      const jobId = n.payloadObj?.jobId || n.payloadObj?.projectId;
+      if (jobId) {
+        navigate(`/projects/${jobId}`);
       } else {
         navigate(`/projects`);
       }

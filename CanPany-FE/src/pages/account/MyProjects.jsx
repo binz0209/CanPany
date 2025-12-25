@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "../../lib/axios";
+import api from "../../lib/axios";
 import { jwtDecode } from "jwt-decode";
 import Button from "../../components/ui/button";
 import { useI18n } from "../../hooks/useI18n";
@@ -28,9 +28,9 @@ export default function MyProjects() {
         ] ||
         dec.userId;
 
-      apiService
-        .get(`/projects/by-owner/${userId}`)
-        .then((data) => setProjects(data ?? []))
+      api
+        .get(`/jobs/company/${userId}`)
+        .then((res) => setProjects(res.data ?? []))
         .catch((err) => console.error(err))
         .finally(() => setLoading(false));
     } catch {
